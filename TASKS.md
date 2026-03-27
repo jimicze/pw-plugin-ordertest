@@ -160,11 +160,11 @@
 
 | # | Task | Est. | Status |
 |---|------|------|--------|
-| 2.38 | Create standalone HTML reporter with sequence timeline (Gantt chart) | 30m | `[ ]` |
-| 2.39 | Add sequence summary table | 15m | `[ ]` |
-| 2.40 | Add dependency graph visualization | 20m | `[ ]` |
-| 2.41 | Add shard distribution view | 15m | `[ ]` |
-| 2.42 | Generate self-contained HTML (embedded CSS/JS, no external deps) | 10m | `[ ]` |
+| 2.38 | Create standalone HTML reporter with sequence timeline (Gantt chart) | 30m | `[x]` |
+| 2.39 | Add sequence summary table | 15m | `[x]` |
+| 2.40 | Add dependency graph visualization | 20m | `[x]` |
+| 2.41 | Add shard distribution view | 15m | `[x]` |
+| 2.42 | Generate self-contained HTML (embedded CSS/JS, no external deps) | 10m | `[x]` |
 
 **Commit**: `feat(engine): add strategies, validator, test filter, reporters`
 

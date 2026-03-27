@@ -107,6 +107,27 @@ _No implementation entries yet. Implementation begins with Batch 0._
 - **Key learning**: PLAYWRIGHT_SHARD env var required for shard integration tests (not --shard CLI arg)
 - 493/493 tests pass with `pnpm verify`
 
+### 2026-03-27 — Cleanup + Smoke Tests
+
+- Removed scaffold placeholder test and stray `undefined/activity.1.log` artifact
+- Added `undefined/` to `.gitignore`
+- Created 3 smoke test files (exports, reporter-subpath, package-contents) — 65 tests
+- Added `pnpm test:smoke` script; updated `pnpm ci:check` to run smoke tests after build
+- 557/557 tests pass with `pnpm verify`
+
+### 2026-03-27 — Custom HTML Reporter (P2 Feature)
+
+- Created `src/reporter/reportData.ts` — all report data types (198 lines)
+- Created `src/reporter/htmlTemplate.ts` — pure HTML generation function with SVG Gantt timeline, summary table, dependency graph, shard distribution view (841 lines)
+- Created `src/reporter/customHtmlReporter.ts` — Playwright Reporter class (575 lines), default export
+- New subpath export: `@playwright-ordertest/core/custom-reporter` (ESM + CJS + types)
+- Updated `tsup.config.ts`, `package.json`, and `src/index.ts` for new entry point
+- Created `tests/unit/htmlTemplate.test.ts` — 52 tests
+- Created `tests/unit/customHtmlReporter.test.ts` — 23 tests
+- Created `tests/smoke/custom-reporter-subpath.test.ts` — 14 smoke tests for built dist
+- All P2 tasks 2.38–2.42 marked complete in TASKS.md
+- 646/646 tests pass with `pnpm verify` (+ 79 smoke tests pass separately)
+
 ---
 
 ## Verify Results Log
@@ -120,6 +141,8 @@ _No implementation entries yet. Implementation begins with Batch 0._
 | 2026-03-27 | 1 | PASS | PASS | 1/1 PASS | Types, errors, logger verified |
 | 2026-03-27 | 7 | PASS | PASS | 493/493 PASS | All unit + integration tests verified |
 | 2026-03-27 | 9 | PASS | PASS | 493/493 PASS | Final verify — all batches complete |
+| 2026-03-27 | smoke | PASS | PASS | 557/557 PASS | After cleanup + smoke tests added |
+| 2026-03-27 | P2 reporter | PASS | PASS | 646/646 PASS | Custom HTML reporter + smoke tests (79 smoke) |
 
 ---
 
