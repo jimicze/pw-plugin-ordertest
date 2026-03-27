@@ -1,0 +1,21 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { defineOrderedConfig } from '../../../../dist/index.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const specsDir = path.resolve(__dirname, '../../sample-specs');
+
+export default defineOrderedConfig({
+  testDir: specsDir,
+  orderedTests: {
+    logLevel: 'silent',
+    sequences: [
+      {
+        name: 'checkout-flow',
+        mode: 'fullyParallel',
+        files: ['auth.spec.js', 'cart.spec.js', 'checkout.spec.js'],
+      },
+    ],
+  },
+  reporter: 'dot',
+});

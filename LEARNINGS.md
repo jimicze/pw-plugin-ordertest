@@ -145,7 +145,44 @@ _No entries yet._
 
 > Issues encountered while writing or running tests.
 
-_No entries yet._
+### process.env.VAR = undefined sets env to the string 'undefined', not undefined
+
+**Date**: 2026-03-27
+**Severity**: high
+**Context**: Writing `logger.test.ts` — clearing env vars in `beforeEach` to prevent test interference.
+**Problem**: `process.env.ORDERTEST_LOG_DIR = undefined` does NOT unset the variable. In Node.js, `process.env` coerces all values to strings, so this sets `ORDERTEST_LOG_DIR` to the string `'undefined'`. When `resolveLogDir` reads it back with `process.env.ORDERTEST_LOG_DIR ?? configLogDir ?? DEFAULT_LOG_DIR`, the string `'undefined'` is truthy/non-nullish and gets returned as the log dir, causing `ensureLogDir` to try to create a directory literally named `undefined` instead of the intended path.
+**Root Cause**: `process.env` in Node.js is a `Record<string, string>` at runtime — values are always coerced to strings. Setting to `undefined` coerces to `'undefined'`.
+**Fix/Workaround**: Use `Reflect.deleteProperty(process.env, 'VAR_NAME')` to truly unset a variable. For restoring to a previously saved value, conditionally restore only when the saved value was not undefined:
+```typescript
+if (savedValue !== undefined) {
+  process.env.MY_VAR = savedValue;
+} else {
+  Reflect.deleteProperty(process.env, 'MY_VAR');
+}
+```
+Biome allows `Reflect.deleteProperty` (it only forbids `delete` operator).
+**Prevention**: NEVER use `process.env.VAR = undefined` to clear an env var. Always use `Reflect.deleteProperty(process.env, 'VAR')`.
+
+### Shard guard collapse causes "Project not found in worker process" error
+
+**Date**: 2026-03-27
+**Severity**: high
+**Context**: Running integration test with `--shard 1/2` on serial-flow fixture config.
+**Problem**: When shard guard collapses `ordertest:checkout-flow:0/1/2` into `ordertest:checkout-flow`, Playwright's runner process sees `ordertest:checkout-flow` in its project list. But when a worker process spawns, it re-evaluates `playwright.config.js`. If `process.argv` in the worker does NOT contain `--shard`, `detectShardFromArgv()` returns `undefined`, so no collapse happens — the worker generates the original un-collapsed project names `ordertest:checkout-flow:0/1/2`. The runner then can't match its `ordertest:checkout-flow` project to any worker-registered project, causing: `Error: Project "ordertest:checkout-flow" not found in the worker process`.
+**Root Cause**: `playwright.config.ts` is re-evaluated per worker spawn (LEARNINGS.md gotcha #5 in Playwright docs). Worker processes don't receive `--shard` in their `argv`, so shard detection via `argv` fails, and the config produces different project names in the main process vs worker processes.
+**Fix/Workaround**: For the `collapse` strategy to work correctly, shard detection must be reliable in worker processes. Options:
+  1. Set the `PLAYWRIGHT_SHARD` env var explicitly (workers inherit env vars from the runner), OR
+  2. Use `shard` in the playwright config object itself (workers re-evaluate the full config including the `shard` field), OR
+  3. Change the collapse strategy to keep individual project names (named `ordertest:checkout-flow:0`, etc.) but merge their `testMatch` and remove `dependencies` — this way names are stable across runner/worker evaluation.
+  Currently, using `--shard N/M` via CLI with `collapse` strategy is broken. Using `PLAYWRIGHT_SHARD=N/M` env var OR `config.shard: { current: N, total: M }` will work correctly because env vars and config fields are available in worker processes.
+**Prevention**: Always test shard guard with `PLAYWRIGHT_SHARD` env var in integration tests, not `--shard` CLI arg. Document that `collapse` strategy requires `PLAYWRIGHT_SHARD` env var or `config.shard` for reliable worker process detection.
+
+**Date**: 2026-03-27
+**Severity**: medium
+**Context**: Designing integration tests that spawn child `npx playwright test` processes.
+**Problem**: Fixture `playwright.config.ts` files can't be executed by Playwright in a temp dir without a tsconfig and tsx/ts-node setup. The child process has no TS transpilation context.
+**Fix/Workaround**: Write fixture playwright configs as `.js` files (ESM) that import from the built `dist/` output using the absolute path to the package root. Use `createRequire` or direct ESM import with `file://` URL for the dist entry point. Alternatively, keep fixture configs in `tests/fixtures/configs/` within the project root so they can resolve deps via the project's `node_modules`.
+**Prevention**: Integration test fixtures that spawn child processes must use plain JS configs or a config within the project that can resolve deps normally.
 
 ---
 

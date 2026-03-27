@@ -1,0 +1,9 @@
+{
+  "sequences": [
+    {
+      "name": "checkout-flow",
+      "mode": "serial",
+      "files": ["auth.spec.js", "cart.spec.js", "checkout.spec.js"]
+    }
+  ]
+}

@@ -199,6 +199,14 @@ export function createLogger(options: CreateLoggerOptions = {}): Logger {
   const logFilePath = path.resolve(logDir, DEFAULT_LOG_FILE);
   const pinoLevel = PINO_LEVEL_MAP[logLevel] ?? 'info';
 
+  // When log level is silent, skip the file transport entirely to avoid
+  // initializing pino-roll unnecessarily (pino-roll can fail in multi-worker
+  // test environments when opened with a silent logger).
+  if (pinoLevel === 'silent') {
+    debugConsole(`Logger initialized (level: ${logLevel}, dir: ${logDir}, stdout: ${isStdout})`);
+    return pino({ level: 'silent' });
+  }
+
   // Build transport targets
   const targets: pino.TransportTargetOptions[] = [
     {
@@ -222,6 +230,14 @@ export function createLogger(options: CreateLoggerOptions = {}): Logger {
   }
 
   const transport = pino.transport({ targets });
+
+  // Prevent pino-roll transport errors (e.g. rotation race conditions in
+  // multi-worker test environments) from crashing the worker process.
+  transport.on('error', (err: unknown) => {
+    process.stderr.write(
+      `[ordertest:warn] Logger transport error (non-fatal): ${String(err instanceof Error ? err.message : err)}\n`,
+    );
+  });
 
   const logger = pino(
     {
