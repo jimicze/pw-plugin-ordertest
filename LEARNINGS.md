@@ -111,6 +111,34 @@ _No entries yet._
 **Fix/Workaround**: Add `"pnpm": { "onlyBuiltDependencies": ["@biomejs/biome", "esbuild"] }` to `package.json`.
 **Prevention**: Always add this field when using biome and tsup/esbuild with pnpm.
 
+### Missing @types/node causes Node.js API errors
+
+**Date**: 2026-03-27
+**Severity**: medium
+**Context**: Running `pnpm typecheck` after creating `logger.ts` which uses `node:fs`, `node:path`, and `process`.
+**Problem**: TypeScript errors: `Cannot find module 'node:fs'`, `Cannot find name 'process'. Do you need to install type definitions for node?`
+**Root Cause**: `@types/node` was not included as a dev dependency in the scaffold. With `verbatimModuleSyntax` and `lib: ["ES2022"]`, Node.js globals and modules are not available without explicit type definitions.
+**Fix/Workaround**: `pnpm add -D @types/node`.
+**Prevention**: Always include `@types/node` in Node.js projects. Add to scaffold checklist.
+
+### pino.default() does not work with verbatimModuleSyntax
+
+**Date**: 2026-03-27
+**Severity**: medium
+**Context**: Creating the pino logger with `import pino from 'pino'` under `verbatimModuleSyntax`.
+**Problem**: `pino.default()` — Property 'default' does not exist on type 'typeof pino'. With `verbatimModuleSyntax`, the default import `pino` IS the function, not a module object with a `.default` property.
+**Fix/Workaround**: Use `pino()` directly, not `pino.default()`.
+**Prevention**: With `verbatimModuleSyntax`, default imports are the value directly. Never use `.default` on a default import.
+
+### Biome useLiteralKeys rule for process.env
+
+**Date**: 2026-03-27
+**Severity**: low
+**Context**: Biome check after creating logger.ts with `process.env['ORDERTEST_LOG_LEVEL']`.
+**Problem**: Biome flags bracket notation `process.env['KEY']` as `lint/complexity/useLiteralKeys` — "The computed expression can be simplified without the use of a string literal."
+**Fix/Workaround**: Use dot notation: `process.env.ORDERTEST_LOG_LEVEL`. This works fine with TypeScript's `noUncheckedIndexedAccess` — the type is still `string | undefined`.
+**Prevention**: Always use dot notation for env var access: `process.env.VAR_NAME` not `process.env['VAR_NAME']`.
+
 ---
 
 ## Testing Issues

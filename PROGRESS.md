@@ -10,9 +10,9 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Phase** | Implementation (Batch 0 complete) |
-| **Overall Progress** | 8 / 145 tasks (6%) |
-| **Current Batch** | Batch 0 complete |
+| **Current Phase** | Implementation (Batch 1 complete) |
+| **Overall Progress** | 32 / 145 tasks (22%) |
+| **Current Batch** | Batch 1 complete |
 | **Blockers** | None |
 | **Last Updated** | 2026-03-27 |
 
@@ -23,7 +23,7 @@
 | Batch | Description | Status | Started | Completed | Notes |
 |-------|-------------|--------|---------|-----------|-------|
 | 0 | Project scaffolding | Complete | 2026-03-27 | 2026-03-27 | All 8 tasks done, pnpm verify passes |
-| 1 | Types + errors + logger | Not started | — | — | |
+| 1 | Types + errors + logger | Complete | 2026-03-27 | 2026-03-27 | All 24 tasks done, pnpm verify passes |
 | 2 | Strategies, validator, filter, reporters | Not started | — | — | P2 tasks deferred to v1.1 |
 | 3 | Project generator + manifest loader | Not started | — | — | |
 | 4 | Shard guard | Not started | — | — | |
@@ -84,6 +84,17 @@ _No implementation entries yet. Implementation begins with Batch 0._
 - **Issue**: pnpm `onlyBuiltDependencies` needed for `@biomejs/biome` and `esbuild` post-install scripts
 - `pnpm verify` passes: typecheck OK, check OK, 1 test passed
 
+### 2026-03-27 — Batch 1: Core Types + Errors + Logger
+
+- Created `src/config/types.ts` — 247 lines: all type definitions (ExecutionMode, ShardStrategy, LogLevel, FileEntry, FileSpecification, SequenceDefinition, OrderedTestPluginConfig, OrderedTestManifest, ShardInfo, OrderTestProjectMetadata, SequenceMetadata), constants (DEFAULT_LOG_DIR, PROJECT_NAME_PREFIX, etc.)
+- Created `src/errors/errors.ts` — 97 lines: 5 error classes (OrderTestError base, ConfigError, ValidationError, ShardError, ManifestError) all with context field and actionable messages
+- Created `src/logger/logger.ts` — 247 lines: pino-based logger with pino-roll rotation, debugConsole() stderr output, env var overrides, createSilentLogger() for testing
+- Updated `src/index.ts` to re-export all public types, errors, and logger utilities
+- Added `@types/node` as dev dependency (missing from scaffold)
+- **Issue**: `pino.default()` doesn't work with `verbatimModuleSyntax` — use `pino()` directly
+- **Issue**: Biome `useLiteralKeys` rule requires `process.env.KEY` instead of `process.env['KEY']`
+- `pnpm verify` passes: typecheck OK, check OK, 1 test passed
+
 ---
 
 ## Verify Results Log
@@ -94,6 +105,7 @@ _No implementation entries yet. Implementation begins with Batch 0._
 | Date | Batch | Typecheck | Lint | Tests | Notes |
 |------|-------|-----------|------|-------|-------|
 | 2026-03-27 | 0 | PASS | PASS | 1/1 PASS | Scaffold verified |
+| 2026-03-27 | 1 | PASS | PASS | 1/1 PASS | Types, errors, logger verified |
 
 ---
 

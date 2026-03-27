@@ -34,40 +34,40 @@
 
 | # | Task | Est. | Status |
 |---|------|------|--------|
-| 1.1 | Define `ExecutionMode` type (`'serial' \| 'parallel' \| 'fullyParallel'`) | 2m | `[ ]` |
-| 1.2 | Define `FileSpecification` interface (`file`, `tests?`, `tags?`) | 3m | `[ ]` |
-| 1.3 | Define `SequenceDefinition` interface (name, mode, files, browser?, retries?, timeout?, workers?, tags?) | 5m | `[ ]` |
-| 1.4 | Define `ShardStrategy` type (`'collapse' \| 'warn' \| 'fail'`) | 2m | `[ ]` |
-| 1.5 | Define `LogRotationConfig` interface (maxSize, maxFiles) | 2m | `[ ]` |
-| 1.6 | Define `OrderedTestPluginConfig` interface (sequences?, manifest?, logLevel?, logDir?, logStdout?, logRotation?, shardStrategy?) | 5m | `[ ]` |
-| 1.7 | Define `OrderedTestManifest` interface (for external manifest files) | 3m | `[ ]` |
-| 1.8 | Define `GeneratedProjectConfig` type (extends PW's project type with plugin metadata) | 5m | `[ ]` |
-| 1.9 | Define `ShardInfo` interface (current, total, source) | 2m | `[ ]` |
-| 1.10 | Define `SequenceMetadata` interface (for reporter: name, position, total, mode, isCollapsed) | 3m | `[ ]` |
-| 1.11 | Export all types with JSDoc comments | 3m | `[ ]` |
+| 1.1 | Define `ExecutionMode` type (`'serial' \| 'parallel' \| 'fullyParallel'`) | 2m | `[x]` |
+| 1.2 | Define `FileSpecification` interface (`file`, `tests?`, `tags?`) | 3m | `[x]` |
+| 1.3 | Define `SequenceDefinition` interface (name, mode, files, browser?, retries?, timeout?, workers?, tags?) | 5m | `[x]` |
+| 1.4 | Define `ShardStrategy` type (`'collapse' \| 'warn' \| 'fail'`) | 2m | `[x]` |
+| 1.5 | Define `LogRotationConfig` interface (maxSize, maxFiles) | 2m | `[x]` |
+| 1.6 | Define `OrderedTestPluginConfig` interface (sequences?, manifest?, logLevel?, logDir?, logStdout?, logRotation?, shardStrategy?) | 5m | `[x]` |
+| 1.7 | Define `OrderedTestManifest` interface (for external manifest files) | 3m | `[x]` |
+| 1.8 | Define `GeneratedProjectConfig` type (extends PW's project type with plugin metadata) | 5m | `[x]` |
+| 1.9 | Define `ShardInfo` interface (current, total, source) | 2m | `[x]` |
+| 1.10 | Define `SequenceMetadata` interface (for reporter: name, position, total, mode, isCollapsed) | 3m | `[x]` |
+| 1.11 | Export all types with JSDoc comments | 3m | `[x]` |
 
 ### 1B — `src/errors/errors.ts`
 
 | # | Task | Est. | Status |
 |---|------|------|--------|
-| 1.12 | Create `OrderTestConfigError` class (with context field) | 3m | `[ ]` |
-| 1.13 | Create `OrderTestShardError` class | 3m | `[ ]` |
-| 1.14 | Create `OrderTestManifestError` class | 3m | `[ ]` |
-| 1.15 | Create `OrderTestValidationError` class (wraps Zod errors) | 3m | `[ ]` |
+| 1.12 | Create `OrderTestConfigError` class (with context field) | 3m | `[x]` |
+| 1.13 | Create `OrderTestShardError` class | 3m | `[x]` |
+| 1.14 | Create `OrderTestManifestError` class | 3m | `[x]` |
+| 1.15 | Create `OrderTestValidationError` class (wraps Zod errors) | 3m | `[x]` |
 
 ### 1C — `src/logger/logger.ts`
 
 | # | Task | Est. | Status |
 |---|------|------|--------|
-| 1.16 | Create `createLogger()` factory function (accepts logLevel, logDir, logStdout) | 10m | `[ ]` |
-| 1.17 | Configure pino file transport to `.ordertest/activity.log` | 5m | `[ ]` |
-| 1.18 | Handle log rotation (maxSize, maxFiles via pino-roll or manual) | 10m | `[ ]` |
-| 1.19 | Support `ORDERTEST_LOG_LEVEL` and `ORDERTEST_LOG_STDOUT` env vars | 5m | `[ ]` |
-| 1.20 | Ensure concurrent-write safety for multi-worker environments | 5m | `[ ]` |
-| 1.21 | Export `Logger` type alias for the pino logger instance | 2m | `[ ]` |
-| 1.22 | Add `debugConsole()` helper — writes `[ordertest:debug]` prefixed lines to stderr | 5m | `[ ]` |
-| 1.23 | Wire debug mode activation: `ORDERTEST_DEBUG` env var, `debug: true` config, or `logLevel: 'debug'` | 5m | `[ ]` |
-| 1.24 | Ensure debug console output does NOT go to stdout (use stderr only) | 2m | `[ ]` |
+| 1.16 | Create `createLogger()` factory function (accepts logLevel, logDir, logStdout) | 10m | `[x]` |
+| 1.17 | Configure pino file transport to `.ordertest/activity.log` | 5m | `[x]` |
+| 1.18 | Handle log rotation (maxSize, maxFiles via pino-roll or manual) | 10m | `[x]` |
+| 1.19 | Support `ORDERTEST_LOG_LEVEL` and `ORDERTEST_LOG_STDOUT` env vars | 5m | `[x]` |
+| 1.20 | Ensure concurrent-write safety for multi-worker environments | 5m | `[x]` |
+| 1.21 | Export `Logger` type alias for the pino logger instance | 2m | `[x]` |
+| 1.22 | Add `debugConsole()` helper — writes `[ordertest:debug]` prefixed lines to stderr | 5m | `[x]` |
+| 1.23 | Wire debug mode activation: `ORDERTEST_DEBUG` env var, `debug: true` config, or `logLevel: 'debug'` | 5m | `[x]` |
+| 1.24 | Ensure debug console output does NOT go to stdout (use stderr only) | 2m | `[x]` |
 
 **Commit**: `feat(types): add core type definitions, errors, and logger`
 
@@ -335,7 +335,7 @@
 | Batch | Description | Priority | Est. | Tasks | Status |
 |-------|-------------|----------|------|-------|--------|
 | 0 | Project scaffolding | P0 | 30m | 8 | `[x]` |
-| 1 | Types + errors + logger | P0 | 45m | 24 | `[ ]` |
+| 1 | Types + errors + logger | P0 | 45m | 24 | `[x]` |
 | 2 | Strategies, validator, filter, reporters | P0/P1/P2 | 2h30m | 50 | `[ ]` |
 | 3 | Project generator + manifest loader | P0 | 1h | 15 | `[ ]` |
 | 4 | Shard guard | P0 | 30m | 7 | `[ ]` |
