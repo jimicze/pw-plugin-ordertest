@@ -304,11 +304,11 @@
 
 | # | Task | Est. | Status |
 |---|------|------|--------|
-| 8.1 | Create `README.md` — quick start, API reference, config reference, examples | 30m | `[ ]` |
-| 8.2 | Create `examples/serial-flow/` — minimal serial ordering example | 10m | `[ ]` |
-| 8.3 | Create `examples/parallel-steps/` — parallel mode example | 10m | `[ ]` |
-| 8.4 | Create `examples/sharded-ci/` — CI sharding example with GitHub Actions | 10m | `[ ]` |
-| 8.5 | Generate JSON schema file for manifest auto-completion | 10m | `[ ]` |
+| 8.1 | Create `README.md` — quick start, API reference, config reference, examples | 30m | `[x]` |
+| 8.2 | Create `examples/serial-flow/` — minimal serial ordering example | 10m | `[x]` |
+| 8.3 | Create `examples/parallel-steps/` — parallel mode example | 10m | `[x]` |
+| 8.4 | Create `examples/sharded-ci/` — CI sharding example with GitHub Actions | 10m | `[x]` |
+| 8.5 | Generate JSON schema file for manifest auto-completion | 10m | `[x]` |
 
 **Commit**: `docs: add README, examples, and JSON schema`
 
@@ -342,7 +342,7 @@
 | 5 | Entry point (defineOrderedConfig) | P0 | 30m | 10 | `[x]` |
 | 6 | Public API (index.ts) | P0 | 15m | 6 | `[x]` |
 | 7 | Tests (unit + integration) | P0 | 3h | 15 | `[x]` |
-| 8 | Docs & examples | P1 | 1h | 5 | `[ ]` |
+| 8 | Docs & examples | P1 | 1h | 5 | `[x]` |
 | 9 | CI & release | P1 | 45m | 5 | `[ ]` |
 | **Total** | | | **~11h** | **145** | |
 

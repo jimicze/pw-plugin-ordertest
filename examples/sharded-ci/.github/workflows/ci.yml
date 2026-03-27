@@ -1,0 +1,23 @@
+name: Playwright Tests (Sharded)
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - name: Run Playwright tests (shard ${{ matrix.shard }}/4)
+        run: npx playwright test --shard=${{ matrix.shard }}/4
+        env:
+          # Required: pass shard info via env var so worker processes can
+          # detect sharding correctly (--shard CLI arg is not visible in workers).
+          PLAYWRIGHT_SHARD: ${{ matrix.shard }}/4

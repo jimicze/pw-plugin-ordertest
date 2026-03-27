@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/playwright-ordertest/core/schema/ordertest-manifest.schema.json",
+  "title": "OrderTest Manifest",
+  "description": "External manifest file for @playwright-ordertest/core defining ordered test sequences.",
+  "type": "object",
+  "required": ["sequences"],
+  "additionalProperties": false,
+  "properties": {
+    "sequences": {
+      "description": "Ordered list of test sequences. Each sequence defines a group of files to run in a specific order and mode.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/SequenceDefinition"
+      }
+    }
+  },
+  "definitions": {
+    "SequenceDefinition": {
+      "description": "A named, ordered group of test files with a specific execution mode.",
+      "type": "object",
+      "required": ["name", "mode", "files"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "Unique identifier for this sequence. Used in project names and log output.",
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "description": "Execution mode for this sequence.",
+          "type": "string",
+          "enum": ["serial", "parallel", "fullyParallel"]
+        },
+        "files": {
+          "description": "Ordered list of test files. Each entry is either a file path string or a FileSpecification object.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/FileSpecification"
+          }
+        },
+        "workers": {
+          "description": "Number of workers to use for this sequence. Ignored in serial mode (always 1).",
+          "type": "integer",
+          "minimum": 1
+        },
+        "retries": {
+          "description": "Number of retries for failed tests in this sequence.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "timeout": {
+          "description": "Test timeout in milliseconds for all tests in this sequence.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "tags": {
+          "description": "Tag filters applied to all files in this sequence. Tests must match at least one tag.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "browser": {
+          "description": "Playwright browser project name to use for this sequence.",
+          "type": "string"
+        }
+      }
+    },
+    "FileSpecification": {
+      "description": "A test file entry. Either a plain file path string or an object with optional per-file test filtering.",
+      "oneOf": [
+        {
+          "description": "Plain file path string.",
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "description": "File specification object with optional test name and tag filters.",
+          "type": "object",
+          "required": ["file"],
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "description": "Path to the test file, relative to testDir.",
+              "type": "string",
+              "minLength": 1
+            },
+            "tests": {
+              "description": "Specific test names to run within this file. If omitted, all tests in the file run.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tags": {
+              "description": "Tag filters for this specific file. Overrides sequence-level tags for this file.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
