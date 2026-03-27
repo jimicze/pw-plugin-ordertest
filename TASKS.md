@@ -320,11 +320,11 @@
 
 | # | Task | Est. | Status |
 |---|------|------|--------|
-| 9.1 | Create `.github/workflows/ci.yml` — test matrix (OS x Node x PW versions) | 15m | `[ ]` |
-| 9.2 | Create `.github/workflows/release.yml` — npm publish on tag | 10m | `[ ]` |
-| 9.3 | Add `CHANGELOG.md` | 5m | `[ ]` |
-| 9.4 | Add `LICENSE` (MIT) | 2m | `[ ]` |
-| 9.5 | Final `pnpm verify` and manual smoke test | 10m | `[ ]` |
+| 9.1 | Create `.github/workflows/ci.yml` — test matrix (OS x Node x PW versions) | 15m | `[x]` |
+| 9.2 | Create `.github/workflows/release.yml` — npm publish on tag | 10m | `[x]` |
+| 9.3 | Add `CHANGELOG.md` | 5m | `[x]` |
+| 9.4 | Add `LICENSE` (MIT) | 2m | `[x]` |
+| 9.5 | Final `pnpm verify` and manual smoke test | 10m | `[x]` |
 
 **Commit**: `ci: add CI/CD workflows and release config`
 
@@ -343,7 +343,7 @@
 | 6 | Public API (index.ts) | P0 | 15m | 6 | `[x]` |
 | 7 | Tests (unit + integration) | P0 | 3h | 15 | `[x]` |
 | 8 | Docs & examples | P1 | 1h | 5 | `[x]` |
-| 9 | CI & release | P1 | 45m | 5 | `[ ]` |
+| 9 | CI & release | P1 | 45m | 5 | `[x]` |
 | **Total** | | | **~11h** | **145** | |
 
 ---

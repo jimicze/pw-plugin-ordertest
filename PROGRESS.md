@@ -10,9 +10,9 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Phase** | Implementation (Batch 7 complete) |
-| **Overall Progress** | 140 / 145 tasks (97%) |
-| **Current Batch** | Batch 8 (Docs & examples) |
+| **Current Phase** | Complete — v0.1.0 ready |
+| **Overall Progress** | 145 / 145 tasks (100%) |
+| **Current Batch** | All batches complete |
 | **Blockers** | None |
 | **Last Updated** | 2026-03-27 |
 
@@ -30,8 +30,8 @@
 | 5 | Entry point (defineOrderedConfig) | Complete | 2026-03-27 | 2026-03-27 | |
 | 6 | Public API (index.ts) | Complete | 2026-03-27 | 2026-03-27 | |
 | 7 | Tests (unit + integration) | Complete | 2026-03-27 | 2026-03-27 | 493/493 tests pass |
-| 8 | Docs & examples | Not started | — | — | |
-| 9 | CI & release | Not started | — | — | |
+| 8 | Docs & examples | Complete | 2026-03-27 | 2026-03-27 | README, examples, JSON schema |
+| 9 | CI & release | Complete | 2026-03-27 | 2026-03-27 | CI matrix, release workflow, CHANGELOG, LICENSE |
 
 ---
 
@@ -119,6 +119,7 @@ _No implementation entries yet. Implementation begins with Batch 0._
 | 2026-03-27 | 0 | PASS | PASS | 1/1 PASS | Scaffold verified |
 | 2026-03-27 | 1 | PASS | PASS | 1/1 PASS | Types, errors, logger verified |
 | 2026-03-27 | 7 | PASS | PASS | 493/493 PASS | All unit + integration tests verified |
+| 2026-03-27 | 9 | PASS | PASS | 493/493 PASS | Final verify — all batches complete |
 
 ---
 
