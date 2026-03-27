@@ -59,9 +59,10 @@
     "test": "npx playwright test",
     "test:unit": "npx playwright test tests/unit/",
     "test:integration": "npx playwright test tests/integration/",
+    "test:smoke": "npx playwright test tests/smoke/",
     "clean": "rm -rf dist .ordertest",
     "verify": "pnpm typecheck && pnpm check && pnpm test",
-    "ci:check": "pnpm clean && pnpm build && pnpm check && pnpm test"
+    "ci:check": "pnpm clean && pnpm build && pnpm check && pnpm test && pnpm test:smoke"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.40.0"
