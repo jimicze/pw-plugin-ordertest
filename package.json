@@ -24,6 +24,16 @@
         "types": "./dist/reporter/orderedHtmlReporter.d.cts",
         "default": "./dist/reporter/orderedHtmlReporter.cjs"
       }
+    },
+    "./custom-reporter": {
+      "import": {
+        "types": "./dist/reporter/customHtmlReporter.d.ts",
+        "default": "./dist/reporter/customHtmlReporter.js"
+      },
+      "require": {
+        "types": "./dist/reporter/customHtmlReporter.d.cts",
+        "default": "./dist/reporter/customHtmlReporter.cjs"
+      }
     }
   },
   "main": "./dist/index.cjs",

@@ -125,3 +125,22 @@ export type { ShardGuardOptions } from './config/shardGuard.js';
 // ---------------------------------------------------------------------------
 
 export { buildGrepPattern, escapeRegex } from './engine/testFilter.js';
+
+// ---------------------------------------------------------------------------
+// Custom HTML Reporter types (data types for custom report visualization)
+// ---------------------------------------------------------------------------
+
+export type { CustomHtmlReporterOptions } from './reporter/customHtmlReporter.js';
+
+export type {
+  DependencyEdge,
+  ReportData,
+  SequenceReportData,
+  ShardReportData,
+  StepReportData,
+  TestReportData,
+  TestStatus,
+} from './reporter/reportData.js';
+
+export type { HtmlTemplateOptions } from './reporter/htmlTemplate.js';
+export { generateHtmlReport, formatDuration, escapeHtml } from './reporter/htmlTemplate.js';
