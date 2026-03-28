@@ -1,0 +1,13 @@
+{
+  "name": "example-with-html-reporter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npx playwright test",
+    "report": "npx playwright show-report"
+  },
+  "dependencies": {
+    "@playwright-ordertest/core": "workspace:*",
+    "@playwright/test": "^1.40.0"
+  }
+}

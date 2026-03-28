@@ -168,7 +168,7 @@ export interface ShardInfo {
 
 /**
  * Plugin metadata attached to generated Playwright project configs.
- * Used by reporters to identify which sequence a project belongs to.
+ * Useful for debugging and custom tooling to identify which sequence a project belongs to.
  */
 export interface OrderTestProjectMetadata {
   /** Name of the sequence this project belongs to. */
@@ -193,7 +193,7 @@ export interface OrderTestProjectMetadata {
 
 /**
  * Metadata about a test's position within an ordered sequence.
- * Injected by the reporter as test attachments.
+ * Useful for custom tooling that needs to understand test ordering context.
  */
 export interface SequenceMetadata {
   /** Name of the sequence the test belongs to. */

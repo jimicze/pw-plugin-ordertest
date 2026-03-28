@@ -98,17 +98,13 @@ types.ts ──────────┬────────────�
                    ├─→ fullyParallelStrategy.ts ┘                 │
                    ├─→ testFilter.ts ──────────┘                  │
                    │                                              │
-                   ├─→ orderedHtmlReporter.ts (independent)       │
-                   ├─→ sequenceTracker.ts (independent)           │
-                   └─→ customHtmlReporter.ts (independent)        │
-                                                                  │
                    manifestLoader.ts ← depends on types.ts + validator.ts
                    index.ts ← depends on everything (write last)
 ```
 
 **Parallel batches:**
 - Batch 1: `types.ts` + `logger.ts` (no deps)
-- Batch 2: `validator.ts` + `serialStrategy.ts` + `parallelStrategy.ts` + `fullyParallelStrategy.ts` + `testFilter.ts` + `orderedHtmlReporter.ts` + `sequenceTracker.ts` + `customHtmlReporter.ts` (all depend only on types.ts)
+- Batch 2: `validator.ts` + `serialStrategy.ts` + `parallelStrategy.ts` + `fullyParallelStrategy.ts` + `testFilter.ts` (all depend only on types.ts)
 - Batch 3: `projectGenerator.ts` + `manifestLoader.ts` (depend on batch 2)
 - Batch 4: `shardGuard.ts` (depends on projectGenerator)
 - Batch 5: `defineOrderedConfig.ts` (depends on everything)
@@ -222,7 +218,7 @@ import { logger } from '../logger/logger.js';
 
 // RULES:
 // - Always use .js extension in import paths (ESM compatibility)
-// - Always use named exports, never default exports (except Reporter classes which PW requires as default)
+// - Always use named exports, never default exports
 // - No barrel re-exports except in src/index.ts
 // - No circular imports — ever. The dependency graph above prevents this.
 // - Import types with `import type { ... }` when importing only types
@@ -342,12 +338,8 @@ User Config (playwright.config.ts or ordertest.config.ts/json/yaml)
  Native Playwright defineConfig()  ─→  Playwright's own scheduler enforces the ordering
        │
        ▼
- orderedHtmlReporter.ts  ─→  Wraps PW HTML reporter, injects sequence metadata
- customHtmlReporter.ts   ─→  Optional standalone reporter with timeline visualization
- sequenceTracker.ts      ─→  Tracks execution progress per sequence
-       │
-       ▼
  logger.ts  ─→  All decisions and events logged to .ordertest/activity.log (pino, JSON)
+ (No custom reporter — standard Playwright reporters work out of the box)
 ```
 
 ---
@@ -356,7 +348,7 @@ User Config (playwright.config.ts or ordertest.config.ts/json/yaml)
 
 ```
 src/
-├── index.ts                         # Public API: exports defineOrderedConfig, types, reporters
+├── index.ts                         # Public API: exports defineOrderedConfig, types, engine, logger
 ├── config/
 │   ├── types.ts                     # All TypeScript interfaces and types
 │   ├── validator.ts                 # Zod schema validation
@@ -369,10 +361,6 @@ src/
 │   ├── parallelStrategy.ts          # Parallel execution: chained projects with deps
 │   ├── fullyParallelStrategy.ts     # FullyParallel: chained projects, fullyParallel per step
 │   └── testFilter.ts               # Test-level grep/filter generation
-├── reporter/
-│   ├── orderedHtmlReporter.ts       # Default: wraps PW HTML reporter + sequence metadata
-│   ├── customHtmlReporter.ts        # Optional: standalone custom HTML reporter
-│   └── sequenceTracker.ts          # Tracks per-sequence execution progress
 ├── logger/
 │   └── logger.ts                    # Pino-based persistent structured logger
 └── errors/
@@ -393,17 +381,21 @@ tests/
 │   ├── serial-execution.test.ts
 │   ├── parallel-execution.test.ts
 │   ├── fullyParallel-execution.test.ts
-│   ├── shard-safety.test.ts
-│   └── reporter.test.ts
+│   └── shard-safety.test.ts
+│   └── multi-sequence.test.ts
 └── fixtures/
     ├── sample-specs/                # .spec.ts files used by integration tests
     ├── manifests/                   # Sample manifest files (JSON, YAML, TS)
     └── configs/                     # Sample playwright configs for integration tests
 
 examples/
-├── serial-flow/
-├── parallel-steps/
-└── sharded-ci/
+├── basic-serial/                    # Simplest setup — serial checkout flow
+├── with-html-reporter/              # Proves PW standard HTML reporter works perfectly
+├── multiple-sequences/              # Two independent sequences in one config
+├── mixed-ordered-unordered/         # Ordered + unordered tests coexisting
+├── external-manifest/               # ordertest.config.json + defineOrderedConfigAsync
+├── test-level-filtering/            # FileSpecification with tests/tags
+└── migration-guide/                 # Before/after migration from standard defineConfig
 ```
 
 ---
@@ -435,7 +427,7 @@ examples/
 
 ### Rules
 
-- **No runtime dependency on Playwright internals.** Only import from `@playwright/test` and `@playwright/test/reporter` — never from `playwright-core/lib/...` or similar internal paths.
+- **No runtime dependency on Playwright internals.** Only import from `@playwright/test` — never from `playwright-core/lib/...` or similar internal paths.
 - **Minimize dependencies.** Every new dependency must be justified in a PR description.
 - **No polyfills.** Node 18+ baseline means native `fs/promises`, `crypto`, `structuredClone`, etc.
 
@@ -492,10 +484,6 @@ logger.warn({ shard: true, mode: 'parallel' }, 'Parallel sequences collapsed to 
 // What to log (level: error)
 logger.error({ err, config }, 'Config validation failed');
 logger.error({ err, file }, 'Manifest file could not be loaded');
-
-// Reporter events (level: info)
-logger.info({ test: 'login ok', sequence: 'checkout-flow', position: '1/3' }, 'Test started');
-logger.info({ test: 'login ok', status: 'passed', duration: 1234 }, 'Test completed');
 ```
 
 ### Log Location and Rotation
@@ -552,8 +540,6 @@ debugConsole(`Config transformation complete (${duration}ms)`);
 | `projectGenerator.ts` | Strategy routing decision, merged project list, unordered files |
 | `shardGuard.ts` | Detection source checked, shard values, strategy decision, collapse details |
 | `defineOrderedConfig.ts` | Entry, manifest vs inline decision, merge steps, final project count, timing |
-| `orderedHtmlReporter.ts` | Sequence mapping built, metadata injected per test, summary generated |
-| `sequenceTracker.ts` | Project name parsed, sequence matched, progress updated |
 
 ---
 
@@ -606,9 +592,8 @@ Batch 2 (types + logger)  → commit: "feat(types): add core type definitions an
 Batch 3 (strategies)      → commit: "feat(engine): add serial, parallel, fullyParallel strategies"
 Batch 4 (config layer)    → commit: "feat(config): add validator, manifest loader, shard guard"
 Batch 5 (entry point)     → commit: "feat(config): add defineOrderedConfig entry point"
-Batch 6 (reporters)       → commit: "feat(reporter): add ordered HTML and custom reporters"
-Batch 7 (public API)      → commit: "feat: wire up public API in index.ts"
-Batch 8 (tests)           → commit: "test: add unit and integration tests"
+Batch 6 (public API)      → commit: "feat: wire up public API in index.ts"
+Batch 7 (tests)           → commit: "test: add unit and integration tests"
 ```
 
 **Rules:**
@@ -630,7 +615,6 @@ Examples:
   fix(config): handle missing manifest file gracefully
   test(engine): add unit tests for parallel strategy
   docs: update AGENTS.md with new logging policy
-  refactor(reporter): extract sequence tracker into separate module
 
 Rules:
 - Subject line: imperative mood, no period, max 72 chars
@@ -651,8 +635,6 @@ Rules:
 3. **Worker distribution**: Tests are grouped into `TestGroup`s by `(workerHash, requireFile)`. Serial mode keeps all tests in one group on one worker. The `workerHash` is based on `projectId + fixturePoolDigest + repeatEachIndex`.
 
 4. **Serial mode retry**: If a test fails in a serial suite, ALL remaining tests skip. On retry, the ENTIRE serial suite re-runs from the beginning on a fresh worker.
-
-5. **Reporter API**: `onBegin(config, rootSuite)` receives the full test tree (read-only). `Suite.allTests()` returns tests in declaration order. The tree is `Root → Project → File → Describe → TestCase`.
 
 ### What NOT to Do
 

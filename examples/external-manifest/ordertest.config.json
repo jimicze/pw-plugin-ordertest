@@ -1,0 +1,10 @@
+{
+  "$schema": "../../schema/ordertest-manifest.schema.json",
+  "sequences": [
+    {
+      "name": "checkout-flow",
+      "mode": "serial",
+      "files": ["auth.spec.ts", "cart.spec.ts", "checkout.spec.ts"]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "example-basic-serial",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npx playwright test"
+  },
+  "dependencies": {
+    "@playwright-ordertest/core": "workspace:*",
+    "@playwright/test": "^1.40.0"
+  }
+}

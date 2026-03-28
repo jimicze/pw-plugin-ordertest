@@ -36,10 +36,6 @@ test.describe('package contents — ESM entry points', () => {
   test('includes dist/index.js (ESM main)', () => {
     expect(packOutput).toContain('dist/index.js');
   });
-
-  test('includes dist/reporter/orderedHtmlReporter.js (ESM reporter)', () => {
-    expect(packOutput).toContain('dist/reporter/orderedHtmlReporter.js');
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -49,10 +45,6 @@ test.describe('package contents — ESM entry points', () => {
 test.describe('package contents — CJS entry points', () => {
   test('includes dist/index.cjs', () => {
     expect(packOutput).toContain('dist/index.cjs');
-  });
-
-  test('includes dist/reporter/orderedHtmlReporter.cjs', () => {
-    expect(packOutput).toContain('dist/reporter/orderedHtmlReporter.cjs');
   });
 });
 
@@ -67,14 +59,6 @@ test.describe('package contents — type declarations', () => {
 
   test('includes dist/index.d.cts (CJS types)', () => {
     expect(packOutput).toContain('dist/index.d.cts');
-  });
-
-  test('includes dist/reporter/orderedHtmlReporter.d.ts', () => {
-    expect(packOutput).toContain('dist/reporter/orderedHtmlReporter.d.ts');
-  });
-
-  test('includes dist/reporter/orderedHtmlReporter.d.cts', () => {
-    expect(packOutput).toContain('dist/reporter/orderedHtmlReporter.d.cts');
   });
 });
 

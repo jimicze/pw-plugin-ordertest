@@ -238,6 +238,14 @@ _No entries yet._
 **Decision**: Use pino with file transport.
 **Rationale**: Fastest JSON logger for Node.js, built-in file transport, handles concurrent writes from multiple worker processes safely, minimal overhead.
 
+### Reporters removed — plugin is a pure config transformer
+
+**Date**: 2026-03-28
+**Context**: After implementing both `orderedHtmlReporter` and `customHtmlReporter`, user evaluation determined reporters were unnecessary.
+**Decision**: Remove both reporters entirely. The plugin is now a pure config transformer.
+**Rationale**: The standard Playwright HTML reporter already works perfectly with ordered test projects because project names (e.g., `ordertest:checkout-flow:0`) appear naturally in the report. Custom reporters added complexity without meaningful value. The generated project names and dependency chains give users full visibility into execution order via any standard Playwright reporter.
+**Impact**: Removed `src/reporter/` directory, subpath exports, and all reporter-related types/tests. Kept `SequenceMetadata` and `OrderTestProjectMetadata` as public API types for potential custom tooling.
+
 ---
 
 ## Performance Notes

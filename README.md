@@ -190,60 +190,36 @@ export default defineOrderedConfigAsync({
 
 ---
 
-## Reporters
+## Works with all Playwright reporters
 
-### Ordered HTML Reporter (default)
-
-Wraps Playwright's built-in HTML reporter and injects sequence metadata (sequence name, step position, execution mode) as test attachments. Enabled automatically when you use `defineOrderedConfig`.
+`defineOrderedConfig` returns a standard Playwright config object. It works with **any** Playwright reporter — HTML, JSON, JUnit, dot, list, or custom.
 
 ```typescript
-// playwright.config.ts — explicit configuration (optional, auto-injected by default)
+// Works perfectly with Playwright's built-in HTML reporter
 export default defineOrderedConfig({
   testDir: './tests',
-  reporter: [['@playwright-ordertest/core/reporter', { logLevel: 'silent' }]],
-  orderedTests: { /* ... */ },
+  reporter: [['html', { open: 'never' }]],
+  orderedTests: {
+    sequences: [
+      { name: 'checkout', mode: 'serial', files: ['auth.spec.ts', 'cart.spec.ts'] },
+    ],
+  },
 });
 ```
 
-### Custom HTML Reporter
-
-A standalone self-contained HTML reporter with four visualization sections:
-
-- **Gantt Timeline** — SVG lanes showing test execution over time
-- **Summary Table** — sequence names, modes, pass/fail counts, durations
-- **Dependency Graph** — SVG node graph with arrows showing project dependency chains
-- **Shard Distribution** — table showing which sequences ran on which shards (auto-hidden when not sharded)
-
 ```typescript
-// playwright.config.ts
+// Multiple reporters — HTML + JUnit for CI
 export default defineOrderedConfig({
   testDir: './tests',
   reporter: [
-    ['@playwright-ordertest/core/custom-reporter', {
-      outputFile: 'ordertest-report.html',  // default
-      showTimeline: true,                    // default
-      showSummary: true,                     // default
-      showDependencyGraph: true,             // default
-      showShardDistribution: true,           // default (auto-hidden if no shards)
-    }],
+    ['html', { outputFolder: 'playwright-report' }],
+    ['junit', { outputFile: 'results.xml' }],
   ],
   orderedTests: { /* ... */ },
 });
 ```
 
-The report is a single self-contained HTML file — no external CSS/JS dependencies. Open it directly in any browser.
-
-#### `CustomHtmlReporterOptions`
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `outputFile` | `string` | `'ordertest-report.html'` | Output file path for the HTML report |
-| `showTimeline` | `boolean` | `true` | Show Gantt timeline visualization |
-| `showSummary` | `boolean` | `true` | Show summary table |
-| `showDependencyGraph` | `boolean` | `true` | Show dependency graph |
-| `showShardDistribution` | `boolean` | `true` | Show shard distribution (auto-hidden if no shards) |
-| `logLevel` | `LogLevel` | `'info'` | Log level for activity logger |
-| `logDir` | `string` | `'.ordertest'` | Directory for log files |
+The HTML report shows your tests organized by the generated project names (e.g., `ordertest:checkout-flow:0`, `ordertest:checkout-flow:1`) with the correct execution order. No special reporter needed.
 
 ---
 

@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **BREAKING**: Removed `orderedHtmlReporter` — the built-in Playwright HTML reporter works out of the box with ordered test projects
+- **BREAKING**: Removed `customHtmlReporter` and all related types (`ReportData`, `CustomHtmlReporterOptions`)
+- Removed `sequenceTracker` module (was internal to reporters)
+- Removed subpath exports `@playwright-ordertest/core/reporter` and `@playwright-ordertest/core/custom-reporter`
+
+### Changed
+
+- Package is now a pure config transformer with no reporter component
+- `SequenceMetadata` and `OrderTestProjectMetadata` types are retained as public API for custom tooling
+
 ## [0.1.0] — 2026-03-27
 
 ### Added
