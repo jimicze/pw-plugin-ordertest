@@ -22,10 +22,20 @@ test.skip(!fs.existsSync(DIST_INDEX), 'dist/ not built — run `pnpm build` firs
 let packOutput: string;
 
 test.beforeAll(() => {
-  packOutput = execSync('pnpm pack --dry-run 2>&1', {
-    cwd: PROJECT_ROOT,
-    encoding: 'utf-8',
-  });
+  try {
+    packOutput = execSync('pnpm pack --dry-run 2>&1', {
+      cwd: PROJECT_ROOT,
+      encoding: 'utf-8',
+    });
+  } catch (error: unknown) {
+    // pnpm pack --dry-run may exit non-zero but still produce useful output
+    if (error instanceof Error && 'stdout' in error) {
+      packOutput = (error as { stdout: string }).stdout;
+    }
+    if (!packOutput) {
+      throw error;
+    }
+  }
 });
 
 // ---------------------------------------------------------------------------

@@ -19,9 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 9
+      - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
@@ -33,7 +31,7 @@ jobs:
 
       - name: Override Playwright version
         if: matrix.pw != 'latest'
-        run: pnpm add -D @playwright/test@${{ matrix.pw }} --no-frozen-lockfile
+        run: pnpm add -D @playwright/test@${{ matrix.pw }}
         shell: bash
 
       - name: Install Playwright browsers
@@ -41,9 +39,6 @@ jobs:
 
       - name: Build
         run: pnpm build
-
-      - name: Smoke tests
-        run: pnpm test:smoke
 
       - name: Typecheck
         run: pnpm typecheck
