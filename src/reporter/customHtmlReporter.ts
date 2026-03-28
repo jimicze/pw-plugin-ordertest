@@ -156,7 +156,21 @@ export default class CustomHtmlReporter implements Reporter {
     const projectNames = suite.suites.map((projectSuite) => projectSuite.project()?.name ?? '');
     this._projectNames = projectNames;
 
-    this._tracker.buildFromProjectNames(projectNames);
+    // Extract metadata (mode, isCollapsed) from config projects when available.
+    // The plugin's strategy functions embed an OrderTestProjectMetadata object in
+    // each project's `metadata` field.
+    const projectMetadataMap = new Map<string, { mode: ExecutionMode; isCollapsed: boolean }>();
+    for (const project of config.projects) {
+      const meta = project.metadata as { mode?: ExecutionMode; isCollapsed?: boolean } | undefined;
+      if (meta && typeof meta.mode === 'string') {
+        projectMetadataMap.set(project.name, {
+          mode: meta.mode,
+          isCollapsed: meta.isCollapsed ?? false,
+        });
+      }
+    }
+
+    this._tracker.buildFromProjectNames(projectNames, projectMetadataMap);
 
     // Extract testMatch (file patterns) for each project from the config
     for (const project of config.projects) {

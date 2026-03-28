@@ -143,8 +143,14 @@ export class SequenceTracker {
    * input produces the same result.
    *
    * @param projectNames - All Playwright project names found in the test suite
+   * @param projectMetadataMap - Optional map of project name → metadata with mode and isCollapsed.
+   *   When provided, the tracker uses the actual execution mode from the project config
+   *   instead of defaulting to 'serial'.
    */
-  buildFromProjectNames(projectNames: readonly string[]): void {
+  buildFromProjectNames(
+    projectNames: readonly string[],
+    projectMetadataMap?: ReadonlyMap<string, { mode: ExecutionMode; isCollapsed: boolean }>,
+  ): void {
     debugConsole(
       `buildFromProjectNames: received ${projectNames.length} project name(s): [${projectNames.join(', ')}]`,
     );
@@ -179,10 +185,11 @@ export class SequenceTracker {
       const totalSteps = stepCountPerSequence.get(parsed.sequenceName) ?? 1;
       const humanPosition = `Step ${parsed.stepIndex + 1} of ${totalSteps}`;
 
-      // Derive execution mode from project name — the mode is not embedded in the
-      // project name, so we use a neutral default here. Reporters that need the
-      // precise mode should cross-reference the Playwright config's project metadata.
-      const mode: ExecutionMode = 'serial';
+      // Derive execution mode from project metadata when available, otherwise
+      // fall back to 'serial' as a neutral default.
+      const projectMeta = projectMetadataMap?.get(projectName);
+      const mode: ExecutionMode = projectMeta?.mode ?? 'serial';
+      const isCollapsed = projectMeta?.isCollapsed ?? false;
 
       const metadata: SequenceMetadata = {
         sequenceName: parsed.sequenceName,
@@ -190,7 +197,7 @@ export class SequenceTracker {
         stepIndex: parsed.stepIndex,
         totalSteps,
         mode,
-        isCollapsed: false,
+        isCollapsed,
       };
 
       this._sequenceMap.set(projectName, metadata);

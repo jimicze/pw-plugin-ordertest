@@ -190,6 +190,63 @@ export default defineOrderedConfigAsync({
 
 ---
 
+## Reporters
+
+### Ordered HTML Reporter (default)
+
+Wraps Playwright's built-in HTML reporter and injects sequence metadata (sequence name, step position, execution mode) as test attachments. Enabled automatically when you use `defineOrderedConfig`.
+
+```typescript
+// playwright.config.ts — explicit configuration (optional, auto-injected by default)
+export default defineOrderedConfig({
+  testDir: './tests',
+  reporter: [['@playwright-ordertest/core/reporter', { logLevel: 'silent' }]],
+  orderedTests: { /* ... */ },
+});
+```
+
+### Custom HTML Reporter
+
+A standalone self-contained HTML reporter with four visualization sections:
+
+- **Gantt Timeline** — SVG lanes showing test execution over time
+- **Summary Table** — sequence names, modes, pass/fail counts, durations
+- **Dependency Graph** — SVG node graph with arrows showing project dependency chains
+- **Shard Distribution** — table showing which sequences ran on which shards (auto-hidden when not sharded)
+
+```typescript
+// playwright.config.ts
+export default defineOrderedConfig({
+  testDir: './tests',
+  reporter: [
+    ['@playwright-ordertest/core/custom-reporter', {
+      outputFile: 'ordertest-report.html',  // default
+      showTimeline: true,                    // default
+      showSummary: true,                     // default
+      showDependencyGraph: true,             // default
+      showShardDistribution: true,           // default (auto-hidden if no shards)
+    }],
+  ],
+  orderedTests: { /* ... */ },
+});
+```
+
+The report is a single self-contained HTML file — no external CSS/JS dependencies. Open it directly in any browser.
+
+#### `CustomHtmlReporterOptions`
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `outputFile` | `string` | `'ordertest-report.html'` | Output file path for the HTML report |
+| `showTimeline` | `boolean` | `true` | Show Gantt timeline visualization |
+| `showSummary` | `boolean` | `true` | Show summary table |
+| `showDependencyGraph` | `boolean` | `true` | Show dependency graph |
+| `showShardDistribution` | `boolean` | `true` | Show shard distribution (auto-hidden if no shards) |
+| `logLevel` | `LogLevel` | `'info'` | Log level for activity logger |
+| `logDir` | `string` | `'.ordertest'` | Directory for log files |
+
+---
+
 ## Logging
 
 The plugin writes structured JSON logs to `.ordertest/activity.log` via pino.

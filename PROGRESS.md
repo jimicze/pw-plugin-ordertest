@@ -24,7 +24,7 @@
 |-------|-------------|--------|---------|-----------|-------|
 | 0 | Project scaffolding | Complete | 2026-03-27 | 2026-03-27 | All 8 tasks done, pnpm verify passes |
 | 1 | Types + errors + logger | Complete | 2026-03-27 | 2026-03-27 | All 24 tasks done, pnpm verify passes |
-| 2 | Strategies, validator, filter, reporters | Complete | 2026-03-27 | 2026-03-27 | P2 tasks deferred to v1.1 |
+| 2 | Strategies, validator, filter, reporters | Complete | 2026-03-27 | 2026-03-27 | All tasks done including P2 custom reporter |
 | 3 | Project generator + manifest loader | Complete | 2026-03-27 | 2026-03-27 | |
 | 4 | Shard guard | Complete | 2026-03-27 | 2026-03-27 | |
 | 5 | Entry point (defineOrderedConfig) | Complete | 2026-03-27 | 2026-03-27 | |

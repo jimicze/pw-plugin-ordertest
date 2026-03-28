@@ -103,9 +103,13 @@ function toPlaywrightProject(project: GeneratedProject, testDir?: string): Recor
     pwProject.timeout = project.timeout;
   }
 
-  // Store metadata so reporters can read it. We use `_ordertestMetadata`
-  // which Playwright ignores (it doesn't strip unknown project fields).
+  // Store metadata so reporters can read it.
+  // We set the native `metadata` field (available in Playwright >=1.45) so that
+  // reporters receive it in FullConfig.projects[n].metadata.
+  // We also keep `_ordertestMetadata` for backward compat and to avoid conflicts
+  // with user-set metadata (the underscore-prefixed version is always ours).
   if (project.metadata !== undefined) {
+    pwProject.metadata = { ...project.metadata };
     pwProject._ordertestMetadata = { ...project.metadata };
   }
 

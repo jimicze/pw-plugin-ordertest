@@ -30,7 +30,7 @@ import type {
   TestResult,
 } from '@playwright/test/reporter';
 
-import type { LogLevel } from '../config/types.js';
+import type { ExecutionMode, LogLevel } from '../config/types.js';
 import type { Logger } from '../logger/logger.js';
 import { createLogger, createSilentLogger, debugConsole } from '../logger/logger.js';
 import { SequenceTracker } from './sequenceTracker.js';
@@ -165,7 +165,22 @@ export default class OrderedHtmlReporter implements Reporter {
       'OrderedHtmlReporter: building sequence map from project names',
     );
 
-    this._tracker.buildFromProjectNames(projectNames);
+    // Extract metadata (mode, isCollapsed) from config projects if available.
+    const projectMetadataMap = new Map<string, { mode: ExecutionMode; isCollapsed: boolean }>();
+    for (const project of config.projects) {
+      const meta = project.metadata as { mode?: ExecutionMode; isCollapsed?: boolean } | undefined;
+      if (meta && typeof meta.mode === 'string') {
+        projectMetadataMap.set(project.name, {
+          mode: meta.mode,
+          isCollapsed: meta.isCollapsed ?? false,
+        });
+      }
+    }
+
+    this._tracker.buildFromProjectNames(
+      projectNames,
+      projectMetadataMap.size > 0 ? projectMetadataMap : undefined,
+    );
 
     const sequenceCount = this._tracker.getAllSequences().length;
     debugConsole(
@@ -176,9 +191,6 @@ export default class OrderedHtmlReporter implements Reporter {
       { sequenceCount, showTimeline: this._options.showSequenceTimeline ?? true },
       'OrderedHtmlReporter: sequence map built',
     );
-
-    // Suppress unused-variable warning for config — it is part of the interface signature.
-    void config;
   }
 
   /**
