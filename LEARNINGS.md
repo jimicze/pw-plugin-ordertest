@@ -84,6 +84,16 @@
 **Fix/Workaround**: The config transformer must be pure and deterministic — same input always produces same output. No `Date.now()`, no `Math.random()`, no side effects (except logging, which is append-only and safe).
 **Prevention**: Never put non-deterministic logic in the config transformer. Always verify idempotency in tests.
 
+### `test.titlePath()` index 0 is the empty root suite title, NOT the project name
+
+**Date**: 2026-03-28
+**Severity**: critical
+**Context**: Reporter `onTestBegin`/`onTestEnd` callbacks use `test.titlePath()` to determine which project a test belongs to, so it can be tracked against ordered sequences.
+**Problem**: Both `orderedHtmlReporter.ts` and `customHtmlReporter.ts` used `titlePath()[0]` to get the project name. This returned an empty string for every test, causing all tests to be classified as "untracked". Reports showed 0 tests in all sequences, all steps marked "skipped".
+**Root Cause**: `test.titlePath()` returns `['', projectName, fileName, ...describePath, testTitle]`. Index 0 is the root suite title (always empty string `''`). Index 1 is the project name.
+**Fix/Workaround**: Changed `titlePath()[0]` → `titlePath()[1]` in both reporter files. Also fixed the unit test mock in `customHtmlReporter.test.ts` to return `['', projectName, ...]` matching the real Playwright API shape.
+**Prevention**: Always verify reporter logic with real Playwright subprocess runs, not just unit test mocks. When mocking `titlePath()`, use the full array shape `['', projectName, fileName, ...describes, testTitle]`. Add a comment in reporter code documenting the index meaning.
+
 ---
 
 ## Build & Tooling Issues

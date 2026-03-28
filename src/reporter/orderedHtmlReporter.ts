@@ -76,17 +76,16 @@ export interface OrderedHtmlReporterOptions {
  * Walk up the suite hierarchy from a TestCase to determine its project name.
  *
  * Playwright's title path structure is:
- *   [projectName, fileName, ...describePath, testTitle]
+ *   ['', projectName, fileName, ...describePath, testTitle]
  *
- * Using `test.titlePath()[0]` is the simplest reliable way to get the project name
- * without importing Playwright internals or relying on private Suite APIs.
+ * Index 0 is always the empty root suite title. The project name is at index 1.
  *
  * @param test - The TestCase whose project name to retrieve
  * @returns The project name string, or an empty string if unavailable
  */
 function getProjectName(test: TestCase): string {
   const titlePath = test.titlePath();
-  return titlePath[0] ?? '';
+  return titlePath[1] ?? '';
 }
 
 /**

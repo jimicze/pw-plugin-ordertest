@@ -32,7 +32,7 @@ function makeMockSuite(projectNames: string[]) {
 function makeMockTestCase(projectName: string, title: string, filePath?: string) {
   return {
     title,
-    titlePath: () => [projectName, filePath ?? 'test.spec.ts', title],
+    titlePath: () => ['', projectName, filePath ?? 'test.spec.ts', title],
     location: filePath ? { file: filePath, line: 1, column: 1 } : undefined,
   };
 }

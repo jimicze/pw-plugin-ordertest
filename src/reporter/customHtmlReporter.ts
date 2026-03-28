@@ -200,7 +200,7 @@ export default class CustomHtmlReporter implements Reporter {
    * @param result - The (in-progress) test result
    */
   onTestBegin(test: TestCase, result: TestResult): void {
-    const projectName = test.titlePath()[0] ?? '';
+    const projectName = test.titlePath()[1] ?? '';
     this._tracker.recordTestStart(projectName);
 
     debugConsole(`onTestBegin: [${projectName}] ${test.title}`);
@@ -216,7 +216,7 @@ export default class CustomHtmlReporter implements Reporter {
    * @param result - The final test result
    */
   onTestEnd(test: TestCase, result: TestResult): void {
-    const projectName = test.titlePath()[0] ?? '';
+    const projectName = test.titlePath()[1] ?? '';
 
     // Collect test data
     const startTime = new Date(result.startTime).toISOString();
