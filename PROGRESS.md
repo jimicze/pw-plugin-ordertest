@@ -10,11 +10,11 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Phase** | Complete — v0.1.0 ready |
-| **Overall Progress** | 145 / 145 tasks (100%) |
+| **Current Phase** | Post-v1 cleanup complete — pure config transformer |
+| **Overall Progress** | 145 / 145 tasks (100%) + reporter removal + 7 examples |
 | **Current Batch** | All batches complete |
 | **Blockers** | None |
-| **Last Updated** | 2026-03-27 |
+| **Last Updated** | 2026-03-28 |
 
 ---
 
@@ -24,13 +24,13 @@
 |-------|-------------|--------|---------|-----------|-------|
 | 0 | Project scaffolding | Complete | 2026-03-27 | 2026-03-27 | All 8 tasks done, pnpm verify passes |
 | 1 | Types + errors + logger | Complete | 2026-03-27 | 2026-03-27 | All 24 tasks done, pnpm verify passes |
-| 2 | Strategies, validator, filter, reporters | Complete | 2026-03-27 | 2026-03-27 | All tasks done including P2 custom reporter |
+| 2 | Strategies, validator, filter | Complete | 2026-03-27 | 2026-03-27 | All tasks done (reporters later removed) |
 | 3 | Project generator + manifest loader | Complete | 2026-03-27 | 2026-03-27 | |
 | 4 | Shard guard | Complete | 2026-03-27 | 2026-03-27 | |
 | 5 | Entry point (defineOrderedConfig) | Complete | 2026-03-27 | 2026-03-27 | |
 | 6 | Public API (index.ts) | Complete | 2026-03-27 | 2026-03-27 | |
-| 7 | Tests (unit + integration) | Complete | 2026-03-27 | 2026-03-27 | 493/493 tests pass |
-| 8 | Docs & examples | Complete | 2026-03-27 | 2026-03-27 | README, examples, JSON schema |
+| 7 | Tests (unit + integration) | Complete | 2026-03-27 | 2026-03-27 | 476/476 tests pass (after reporter removal) |
+| 8 | Docs & examples | Complete | 2026-03-27 | 2026-03-28 | README, 7 examples, JSON schema |
 | 9 | CI & release | Complete | 2026-03-27 | 2026-03-27 | CI matrix, release workflow, CHANGELOG, LICENSE |
 
 ---
@@ -128,6 +128,34 @@ _No implementation entries yet. Implementation begins with Batch 0._
 - All P2 tasks 2.38–2.42 marked complete in TASKS.md
 - 646/646 tests pass with `pnpm verify` (+ 79 smoke tests pass separately)
 
+### 2026-03-28 — Reporter Removal + 7 Example Projects
+
+- **BREAKING**: Removed both `orderedHtmlReporter` and `customHtmlReporter` — plugin is now a pure config transformer
+- Deleted `src/reporter/` (5 files: orderedHtmlReporter, customHtmlReporter, sequenceTracker, reportData, htmlTemplate)
+- Deleted reporter tests (customHtmlReporter, sequenceTracker, htmlTemplate unit tests + custom-reporter integration test)
+- Deleted reporter smoke tests (reporter-subpath, custom-reporter-subpath)
+- Deleted `tests/fixtures/configs/custom-reporter/` directory
+- Removed `./reporter` and `./custom-reporter` subpath exports from `package.json`
+- Simplified `tsup.config.ts` to single entry point (`src/index.ts`)
+- Renamed `tests/integration/reporter.test.ts` to `multi-sequence.test.ts`
+- Updated `README.md`: replaced "Reporters" section with standard reporter compatibility guidance
+- Updated `CHANGELOG.md`: added [Unreleased] section with BREAKING reporter removal
+- Updated `AGENTS.md`: removed all reporter references from architecture, dependency graph, batches, examples
+- Updated `LEARNINGS.md`: added "Reporters removed" design decision entry
+- Deleted old examples (`serial-flow/`, `parallel-steps/`, `sharded-ci/`)
+- Created 7 new example projects (each with package.json, playwright.config.ts, specs, README.md):
+  1. `basic-serial/` — simplest serial checkout flow
+  2. `with-html-reporter/` — proves PW standard HTML reporter works perfectly
+  3. `multiple-sequences/` — two independent sequences in one config
+  4. `mixed-ordered-unordered/` — ordered + unordered tests coexisting
+  5. `external-manifest/` — ordertest.config.json + defineOrderedConfigAsync
+  6. `test-level-filtering/` — FileSpecification with tests/tags
+  7. `migration-guide/` — before/after migration from standard defineConfig
+- 76 files changed, 769 insertions, 4,358 deletions
+- 476/476 tests pass, typecheck clean, Biome clean
+- 50/50 smoke tests pass
+- Build: single-entry dist/index.js (44.58 KB ESM), dist/index.cjs (50.54 KB CJS)
+
 ---
 
 ## Verify Results Log
@@ -143,6 +171,7 @@ _No implementation entries yet. Implementation begins with Batch 0._
 | 2026-03-27 | 9 | PASS | PASS | 493/493 PASS | Final verify — all batches complete |
 | 2026-03-27 | smoke | PASS | PASS | 557/557 PASS | After cleanup + smoke tests added |
 | 2026-03-27 | P2 reporter | PASS | PASS | 646/646 PASS | Custom HTML reporter + smoke tests (79 smoke) |
+| 2026-03-28 | reporter removal | PASS | PASS | 476/476 PASS | Reporters removed, 7 examples added, 50 smoke tests pass |
 
 ---
 
