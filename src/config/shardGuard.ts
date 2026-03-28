@@ -1,5 +1,5 @@
 /**
- * Shard guard for @playwright-ordertest/core.
+ * Shard guard for @jimicze-pw/ordertest-core.
  *
  * Detects CI sharding configuration from three sources (config, argv, env) and
  * adjusts or collapses ordered project chains to prevent order breakage across
@@ -232,9 +232,9 @@ export function resolveShardStrategy(configStrategy?: ShardStrategy): ShardStrat
  */
 function collectTestMatch(project: GeneratedProject): string[] {
   if (Array.isArray(project.testMatch)) {
-    return project.testMatch as string[];
+    return [...project.testMatch];
   }
-  return [project.testMatch as string];
+  return [project.testMatch];
 }
 
 /**
@@ -273,7 +273,7 @@ function collapseSequenceGroup(
   const internalPrefix = `${PROJECT_NAME_PREFIX}:${sequenceName}:`;
   const externalDeps: string[] =
     firstProject?.dependencies !== undefined
-      ? (firstProject.dependencies as string[]).filter((dep) => !dep.startsWith(internalPrefix))
+      ? firstProject.dependencies.filter((dep) => !dep.startsWith(internalPrefix))
       : [];
 
   // Inherit mode from metadata (fall back to 'serial' for safety)

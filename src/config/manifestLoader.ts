@@ -1,5 +1,5 @@
 /**
- * External manifest file loader for @playwright-ordertest/core.
+ * External manifest file loader for @jimicze-pw/ordertest-core.
  *
  * Supports JSON, YAML, and TypeScript manifest formats. When no explicit path is
  * provided, auto-discovers the manifest by searching the project root in a
@@ -253,10 +253,22 @@ export async function loadManifest(options: LoadManifestOptions): Promise<Ordere
   // Step 1: Resolve the manifest file path
   // ---------------------------------------------------------------------------
 
+  // ORDERTEST_MANIFEST env var overrides both explicit manifestPath and auto-discovery
+  const envManifestPath = process.env.ORDERTEST_MANIFEST;
+  const effectiveManifestPath =
+    envManifestPath !== undefined && envManifestPath.length > 0
+      ? envManifestPath
+      : options.manifestPath;
+
+  if (envManifestPath !== undefined && envManifestPath.length > 0) {
+    debugConsole(`  ORDERTEST_MANIFEST env var override: "${envManifestPath}"`);
+    logger?.debug({ envManifestPath }, 'ORDERTEST_MANIFEST env var overrides manifest path');
+  }
+
   let resolvedPath: string;
 
-  if (options.manifestPath !== undefined && options.manifestPath.length > 0) {
-    resolvedPath = path.resolve(rootDir, options.manifestPath);
+  if (effectiveManifestPath !== undefined && effectiveManifestPath.length > 0) {
+    resolvedPath = path.resolve(rootDir, effectiveManifestPath);
     debugConsole(`  Using explicit manifest path: ${resolvedPath}`);
     logger?.debug({ resolvedPath }, 'Using explicit manifest path');
 
@@ -267,7 +279,7 @@ export async function loadManifest(options: LoadManifestOptions): Promise<Ordere
       await fs.access(resolvedPath);
     } catch {
       throw new OrderTestManifestError(
-        `Manifest file not found at "${resolvedPath}". Check the "manifest" option in your Playwright config and verify the path is correct.`,
+        `Manifest file not found at "${resolvedPath}". ${envManifestPath !== undefined && envManifestPath.length > 0 ? 'Check the ORDERTEST_MANIFEST environment variable' : 'Check the "manifest" option in your Playwright config'} and verify the path is correct.`,
         { filePath: resolvedPath, rootDir },
       );
     }

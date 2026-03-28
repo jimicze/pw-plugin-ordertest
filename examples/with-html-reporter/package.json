@@ -7,7 +7,7 @@
     "report": "npx playwright show-report"
   },
   "dependencies": {
-    "@playwright-ordertest/core": "workspace:*",
+    "@jimicze-pw/ordertest-core": "workspace:*",
     "@playwright/test": "^1.40.0"
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Main entry point for @playwright-ordertest/core.
+ * Main entry point for @jimicze-pw/ordertest-core.
  *
  * `defineOrderedConfig()` is the primary API consumers use. It wraps
  * Playwright's own config object, extracts the `orderedTests` plugin section,
@@ -15,6 +15,9 @@
  * - No side effects beyond logging.
  * - Passthrough when no orderedTests config is present.
  */
+
+import fs from 'node:fs';
+import path from 'node:path';
 
 import {
   type GeneratedProject,
@@ -172,7 +175,7 @@ function buildUnorderedProject(
  * `playwright.config.ts`:
  *
  * ```typescript
- * import { defineOrderedConfig } from '@playwright-ordertest/core';
+ * import { defineOrderedConfig } from '@jimicze-pw/ordertest-core';
  *
  * export default defineOrderedConfig({
  *   orderedTests: {
@@ -201,7 +204,13 @@ export function defineOrderedConfig(config: PlaywrightConfigWithOrderedTests): T
   // Step 1: Extract and validate the orderedTests section
   // -------------------------------------------------------------------------
 
-  const { orderedTests, projects: userProjects, shard: configShard, ...restConfig } = config;
+  const {
+    orderedTests,
+    projects: userProjects,
+    shard: configShard,
+    testDir: topLevelTestDir,
+    ...restConfig
+  } = config;
 
   // Passthrough: no orderedTests config at all
   if (orderedTests === undefined) {
@@ -224,17 +233,21 @@ export function defineOrderedConfig(config: PlaywrightConfigWithOrderedTests): T
   const sequences = validatedConfig.sequences;
 
   if (sequences === undefined || sequences.length === 0) {
-    // No sequences: check if manifest is specified
-    if (validatedConfig.manifest !== undefined) {
+    // No sequences: check if manifest is specified (explicit or env var)
+    const envManifest = process.env.ORDERTEST_MANIFEST;
+    if (
+      validatedConfig.manifest !== undefined ||
+      (envManifest !== undefined && envManifest.length > 0)
+    ) {
       throw new OrderTestConfigError(
         'orderedTests.manifest is specified but defineOrderedConfig() is synchronous. Use defineOrderedConfigAsync() to load manifest files, or provide inline sequences.',
-        { manifest: validatedConfig.manifest },
+        { manifest: validatedConfig.manifest, envManifest },
       );
     }
 
     debugConsole('defineOrderedConfig: no sequences defined — passthrough');
     logger.info('No sequences defined — passing config through unchanged');
-    return { ...restConfig, projects: userProjects } as TransformedConfig;
+    return { ...restConfig, testDir: topLevelTestDir, projects: userProjects } as TransformedConfig;
   }
 
   debugConsole(`defineOrderedConfig: ${sequences.length} sequence(s) to process`);
@@ -244,7 +257,14 @@ export function defineOrderedConfig(config: PlaywrightConfigWithOrderedTests): T
   // Step 3: Generate projects from sequences
   // -------------------------------------------------------------------------
 
-  const result = transformConfig(sequences, validatedConfig, configShard, userProjects, logger);
+  const result = transformConfig(
+    sequences,
+    validatedConfig,
+    configShard,
+    userProjects,
+    topLevelTestDir as string | undefined,
+    logger,
+  );
 
   const duration = Math.round(performance.now() - startTime);
   debugConsole(`defineOrderedConfig: complete (${duration}ms)`);
@@ -253,7 +273,11 @@ export function defineOrderedConfig(config: PlaywrightConfigWithOrderedTests): T
     'Config transformation complete',
   );
 
-  return { ...restConfig, projects: result.projects } as TransformedConfig;
+  return {
+    ...restConfig,
+    testDir: topLevelTestDir,
+    projects: result.projects,
+  } as TransformedConfig;
 }
 
 // ---------------------------------------------------------------------------
@@ -268,7 +292,7 @@ export function defineOrderedConfig(config: PlaywrightConfigWithOrderedTests): T
  * `ordertest.config.json`, `.yaml`, or `.ts` file.
  *
  * ```typescript
- * import { defineOrderedConfigAsync } from '@playwright-ordertest/core';
+ * import { defineOrderedConfigAsync } from '@jimicze-pw/ordertest-core';
  *
  * export default defineOrderedConfigAsync({
  *   orderedTests: {
@@ -292,7 +316,13 @@ export async function defineOrderedConfigAsync(
   // Step 1: Extract and validate
   // -------------------------------------------------------------------------
 
-  const { orderedTests, projects: userProjects, shard: configShard, ...restConfig } = config;
+  const {
+    orderedTests,
+    projects: userProjects,
+    shard: configShard,
+    testDir: topLevelTestDir,
+    ...restConfig
+  } = config;
 
   if (orderedTests === undefined) {
     debugConsole('defineOrderedConfigAsync: no orderedTests config — passthrough');
@@ -336,7 +366,7 @@ export async function defineOrderedConfigAsync(
   if (sequences === undefined || sequences.length === 0) {
     debugConsole('defineOrderedConfigAsync: no sequences found — passthrough');
     logger.info('No sequences found (inline or manifest) — passing config through unchanged');
-    return { ...restConfig, projects: userProjects } as TransformedConfig;
+    return { ...restConfig, testDir: topLevelTestDir, projects: userProjects } as TransformedConfig;
   }
 
   debugConsole(`defineOrderedConfigAsync: ${sequences.length} sequence(s) to process`);
@@ -345,7 +375,14 @@ export async function defineOrderedConfigAsync(
   // Step 3: Generate projects
   // -------------------------------------------------------------------------
 
-  const result = transformConfig(sequences, validatedConfig, configShard, userProjects, logger);
+  const result = transformConfig(
+    sequences,
+    validatedConfig,
+    configShard,
+    userProjects,
+    topLevelTestDir as string | undefined,
+    logger,
+  );
 
   const duration = Math.round(performance.now() - startTime);
   debugConsole(`defineOrderedConfigAsync: complete (${duration}ms)`);
@@ -354,7 +391,11 @@ export async function defineOrderedConfigAsync(
     'Async config transformation complete',
   );
 
-  return { ...restConfig, projects: result.projects } as TransformedConfig;
+  return {
+    ...restConfig,
+    testDir: topLevelTestDir,
+    projects: result.projects,
+  } as TransformedConfig;
 }
 
 // ---------------------------------------------------------------------------
@@ -421,6 +462,48 @@ async function resolveManifest(
 }
 
 /**
+ * Validate that all files referenced in sequences exist on disk.
+ *
+ * @param sequences - The sequence definitions to validate
+ * @param testDir - The base test directory to resolve files against
+ * @param logger - Logger for debug output
+ * @throws {OrderTestConfigError} If any referenced file does not exist
+ */
+function validateFileExistence(
+  sequences: readonly SequenceDefinition[],
+  testDir: string | undefined,
+  logger: Logger,
+): void {
+  const baseDir = testDir ?? process.cwd();
+
+  debugConsole(`validateFileExistence: checking files against testDir="${baseDir}"`);
+  logger.debug({ baseDir }, 'Validating file existence for all sequences');
+
+  for (const sequence of sequences) {
+    for (const entry of sequence.files) {
+      const filePath = typeof entry === 'string' ? entry : entry.file;
+      const absolutePath = path.resolve(baseDir, filePath);
+
+      if (!fs.existsSync(absolutePath)) {
+        const msg = `File "${filePath}" in sequence "${sequence.name}" does not exist. Searched in testDir: "${baseDir}" (resolved to: "${absolutePath}")`;
+        logger.error({ filePath, sequence: sequence.name, baseDir, absolutePath }, msg);
+        throw new OrderTestConfigError(msg, {
+          filePath,
+          sequenceName: sequence.name,
+          testDir: baseDir,
+          absolutePath,
+        });
+      }
+
+      debugConsole(`  ✓ ${filePath} → ${absolutePath}`);
+    }
+  }
+
+  debugConsole('validateFileExistence: all files exist');
+  logger.debug('All referenced files validated successfully');
+}
+
+/**
  * Core transformation logic shared between sync and async entry points.
  *
  * 1. Generates projects from sequences via strategy routing.
@@ -440,8 +523,21 @@ function transformConfig(
   validatedConfig: OrderedTestPluginConfig,
   configShard: { current: number; total: number } | undefined,
   userProjects: readonly Record<string, unknown>[] | undefined,
+  topLevelTestDir: string | undefined,
   logger: Logger,
 ): TransformResult {
+  // -----------------------------------------------------------------------
+  // Step 0: Extract testDir and validate file existence
+  // -----------------------------------------------------------------------
+
+  // testDir resolution: prefer project-level testDir, then top-level testDir
+  const projectTestDir = (userProjects?.[0] as Record<string, unknown> | undefined)?.testDir as
+    | string
+    | undefined;
+  const testDir = projectTestDir ?? topLevelTestDir;
+
+  validateFileExistence(sequences, testDir, logger);
+
   // -----------------------------------------------------------------------
   // Step A: Generate projects from sequences
   // -----------------------------------------------------------------------
@@ -484,10 +580,6 @@ function transformConfig(
   // -----------------------------------------------------------------------
   // Step C: Build Playwright project configs
   // -----------------------------------------------------------------------
-
-  const testDir = (userProjects?.[0] as Record<string, unknown> | undefined)?.testDir as
-    | string
-    | undefined;
 
   // Convert generated projects to Playwright-compatible format
   const orderedPlaywrightProjects = generatedProjects.map((p) => toPlaywrightProject(p, testDir));

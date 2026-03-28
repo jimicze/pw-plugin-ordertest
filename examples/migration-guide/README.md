@@ -5,7 +5,7 @@ Shows how to migrate from a standard Playwright `defineConfig` to `defineOrdered
 ## What This Shows
 
 - **Before**: `playwright.config.before.ts` — standard Playwright config, no ordering
-- **After**: `playwright.config.ts` — migrated to `@playwright-ordertest/core`
+- **After**: `playwright.config.ts` — migrated to `@jimicze-pw/ordertest-core`
 - **Minimal changes**: Only two things change:
   1. Replace `import { defineConfig }` with `import { defineOrderedConfig }`
   2. Add `orderedTests.sequences` section
@@ -15,14 +15,14 @@ Shows how to migrate from a standard Playwright `defineConfig` to `defineOrdered
 ### Step 1: Install the package
 
 ```bash
-npm install @playwright-ordertest/core
+npm install @jimicze-pw/ordertest-core
 ```
 
 ### Step 2: Update the import
 
 ```diff
 - import { defineConfig } from '@playwright/test';
-+ import { defineOrderedConfig } from '@playwright-ordertest/core';
++ import { defineOrderedConfig } from '@jimicze-pw/ordertest-core';
 ```
 
 ### Step 3: Replace `defineConfig` with `defineOrderedConfig`

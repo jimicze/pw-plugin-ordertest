@@ -1,5 +1,5 @@
 /**
- * Zod schema validation for @playwright-ordertest/core plugin config and manifest.
+ * Zod schema validation for @jimicze-pw/ordertest-core plugin config and manifest.
  *
  * Validates all user-supplied input at the entry point so that downstream modules
  * can trust the data they receive. Validation failures produce clear, actionable

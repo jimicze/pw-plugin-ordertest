@@ -1,6 +1,6 @@
 # HTML Reporter Compatibility Example
 
-Proves that Playwright's **standard HTML reporter** works perfectly with `@playwright-ordertest/core`. No custom reporter needed.
+Proves that Playwright's **standard HTML reporter** works perfectly with `@jimicze-pw/ordertest-core`. No custom reporter needed.
 
 ## What This Shows
 

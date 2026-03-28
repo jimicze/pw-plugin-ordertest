@@ -1,6 +1,6 @@
 # PROGRESS.md — Implementation Progress Tracker
 
-> This file tracks the implementation progress of `@playwright-ordertest/core`.
+> This file tracks the implementation progress of `@jimicze-pw/ordertest-core`.
 > Agents: update this file after completing each batch or significant milestone.
 > See [TASKS.md](./TASKS.md) for the full task breakdown.
 
@@ -10,9 +10,9 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Phase** | Post-v1 cleanup complete — pure config transformer |
-| **Overall Progress** | 145 / 145 tasks (100%) + reporter removal + 7 examples |
-| **Current Batch** | All batches complete |
+| **Current Phase** | v0.1.0 published to npm |
+| **Overall Progress** | 145 original tasks + gap-fix batches A–E complete + npm publish |
+| **Current Batch** | All batches complete (original 0–9 + gap-fix A–G) |
 | **Blockers** | None |
 | **Last Updated** | 2026-03-28 |
 
@@ -32,6 +32,13 @@
 | 7 | Tests (unit + integration) | Complete | 2026-03-27 | 2026-03-27 | 476/476 tests pass (after reporter removal) |
 | 8 | Docs & examples | Complete | 2026-03-27 | 2026-03-28 | README, 7 examples, JSON schema |
 | 9 | CI & release | Complete | 2026-03-27 | 2026-03-27 | CI matrix, release workflow, CHANGELOG, LICENSE |
+| A | Package metadata cleanup | Complete | 2026-03-28 | 2026-03-28 | Version 0.1.0, metadata fields, CHANGELOG, schema URL, .gitignore |
+| B | Missing features | Complete | 2026-03-28 | 2026-03-28 | ORDERTEST_MANIFEST env var, file existence validation |
+| C | CI/release workflow fixes | Complete | 2026-03-28 | 2026-03-28 | PW 1.44 matrix, caching, artifacts, tag verification, --provenance |
+| D | Type assertion cleanup | Complete | 2026-03-28 | 2026-03-28 | Removed 4 redundant `as` assertions |
+| E | README + tests for new features | Complete | 2026-03-28 | 2026-03-28 | Error docs, env vars, advanced API, migration guide, 12 new tests |
+| F | Final verify + build + commit | Complete | 2026-03-28 | 2026-03-28 | 488 tests pass, dist rebuilt |
+| G | npm publish | Complete | 2026-03-28 | 2026-03-28 | Published @jimicze-pw/ordertest-core@0.1.0 |
 
 ---
 
@@ -120,7 +127,7 @@ _No implementation entries yet. Implementation begins with Batch 0._
 - Created `src/reporter/reportData.ts` — all report data types (198 lines)
 - Created `src/reporter/htmlTemplate.ts` — pure HTML generation function with SVG Gantt timeline, summary table, dependency graph, shard distribution view (841 lines)
 - Created `src/reporter/customHtmlReporter.ts` — Playwright Reporter class (575 lines), default export
-- New subpath export: `@playwright-ordertest/core/custom-reporter` (ESM + CJS + types)
+- New subpath export: `@jimicze-pw/ordertest-core/custom-reporter` (ESM + CJS + types)
 - Updated `tsup.config.ts`, `package.json`, and `src/index.ts` for new entry point
 - Created `tests/unit/htmlTemplate.test.ts` — 52 tests
 - Created `tests/unit/customHtmlReporter.test.ts` — 23 tests
@@ -156,6 +163,16 @@ _No implementation entries yet. Implementation begins with Batch 0._
 - 50/50 smoke tests pass
 - Build: single-entry dist/index.js (44.58 KB ESM), dist/index.cjs (50.54 KB CJS)
 
+### 2026-03-28 — Gap-Fix Batches A–E: Publishing Readiness
+
+- **Batch A (metadata)**: Bumped version to 0.1.0, added author/repository/homepage/bugs/publishConfig fields to package.json, fixed CHANGELOG (merged [Unreleased] into [0.1.0], fixed GitHub URLs, test count), fixed schema $id URL, deleted empty src/reporter/ dir, fixed .gitignore
+- **Batch B (features)**: Implemented ORDERTEST_MANIFEST env var in manifestLoader.ts (overrides manifest path, priority: env > options > auto-discovery); implemented file existence validation in defineOrderedConfig.ts (validateFileExistence checks all sequence files exist before project generation)
+- **Batch C (CI)**: Fixed ci.yml (PW version install --no-frozen-lockfile, added PW 1.44.0 to matrix, pnpm store caching, artifact upload on failure, smoke test step); fixed release.yml (tag/version verification, --provenance flag, pnpm caching)
+- **Batch D (code quality)**: Removed 4 redundant type assertions (1 in serialStrategy.ts, 3 in shardGuard.ts)
+- **Batch E (README + tests)**: Expanded README with Error Handling section (5 error classes), Environment Variables table (ORDERTEST_MANIFEST, ORDERTEST_SHARD_STRATEGY, PLAYWRIGHT_SHARD), Advanced API section (all exports), Migration Guide; added 5 tests for ORDERTEST_MANIFEST env var, 7 tests for file existence validation
+- **Batch F (verify + build)**: Rebuilt dist, 488/488 tests pass, typecheck + Biome clean
+- 488/488 tests pass, 50/50 smoke tests pass, dist rebuilt
+
 ---
 
 ## Verify Results Log
@@ -172,6 +189,9 @@ _No implementation entries yet. Implementation begins with Batch 0._
 | 2026-03-27 | smoke | PASS | PASS | 557/557 PASS | After cleanup + smoke tests added |
 | 2026-03-27 | P2 reporter | PASS | PASS | 646/646 PASS | Custom HTML reporter + smoke tests (79 smoke) |
 | 2026-03-28 | reporter removal | PASS | PASS | 476/476 PASS | Reporters removed, 7 examples added, 50 smoke tests pass |
+| 2026-03-28 | gap-fix A-D, B | PASS | PASS | 476/476 PASS | Metadata, CI, features, code quality fixes |
+| 2026-03-28 | gap-fix E | PASS | PASS | 488/488 PASS | README expansion + 12 new tests |
+| 2026-03-28 | gap-fix F | PASS | PASS | 488/488 PASS | Final verify before publish, dist rebuilt |
 
 ---
 

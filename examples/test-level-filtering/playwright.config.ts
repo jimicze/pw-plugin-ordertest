@@ -1,4 +1,4 @@
-import { defineOrderedConfig } from '@playwright-ordertest/core';
+import { defineOrderedConfig } from '@jimicze-pw/ordertest-core';
 
 /**
  * Test-level filtering example.

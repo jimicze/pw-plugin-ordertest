@@ -1,8 +1,12 @@
 {
-  "name": "@playwright-ordertest/core",
-  "version": "0.0.0",
+  "name": "@jimicze-pw/ordertest-core",
+  "version": "0.1.0",
   "description": "Playwright Test plugin for deterministic, user-defined test execution ordering across files and test methods",
   "license": "MIT",
+  "author": "jimicze",
+  "repository": { "type": "git", "url": "git+https://github.com/jimicze/pw-plugin-ordertest.git" },
+  "homepage": "https://github.com/jimicze/pw-plugin-ordertest#readme",
+  "bugs": { "url": "https://github.com/jimicze/pw-plugin-ordertest/issues" },
   "type": "module",
   "exports": {
     ".": {
@@ -23,6 +27,8 @@
     "dist",
     "schema"
   ],
+  "publishConfig": { "access": "public" },
+  "sideEffects": false,
   "engines": {
     "node": ">=18.0.0"
   },

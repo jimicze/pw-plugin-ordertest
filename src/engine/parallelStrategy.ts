@@ -1,5 +1,5 @@
 /**
- * Parallel execution strategy for @playwright-ordertest/core.
+ * Parallel execution strategy for @jimicze-pw/ordertest-core.
  *
  * Files in the sequence run in the defined order, enforced via Playwright's
  * `dependencies` mechanism. Tests within each file may use multiple workers

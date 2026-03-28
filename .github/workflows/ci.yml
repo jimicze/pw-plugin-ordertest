@@ -15,28 +15,25 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         node: ['18', '20', '22']
-        pw: ['1.40.0', 'latest']
+        pw: ['1.40.0', '1.44.0', 'latest']
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
 
       - uses: pnpm/action-setup@v3
         with:
           version: 9
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright ${{ matrix.pw }}
-        run: |
-          if [ "${{ matrix.pw }}" = "latest" ]; then
-            pnpm add -D @playwright/test@latest
-          else
-            pnpm add -D @playwright/test@${{ matrix.pw }}
-          fi
+      - name: Override Playwright version
+        if: matrix.pw != 'latest'
+        run: pnpm add -D @playwright/test@${{ matrix.pw }} --no-frozen-lockfile
         shell: bash
 
       - name: Install Playwright browsers
@@ -44,6 +41,9 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Smoke tests
+        run: pnpm test:smoke
 
       - name: Typecheck
         run: pnpm typecheck
@@ -53,3 +53,13 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}-node${{ matrix.node }}-pw${{ matrix.pw }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

@@ -5,7 +5,7 @@
  * in alphabetical order and may parallelize across workers.
  *
  * This file is NOT used — it's here to show what the config looked
- * like before migrating to @playwright-ordertest/core.
+ * like before migrating to @jimicze-pw/ordertest-core.
  */
 import { defineConfig } from '@playwright/test';
 

@@ -1,4 +1,4 @@
-import { defineOrderedConfigAsync } from '@playwright-ordertest/core';
+import { defineOrderedConfigAsync } from '@jimicze-pw/ordertest-core';
 
 /**
  * External manifest example.

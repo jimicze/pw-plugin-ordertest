@@ -1,4 +1,4 @@
-# AGENTS.md — Coding Agent Instructions for @playwright-ordertest/core
+# AGENTS.md — Coding Agent Instructions for @jimicze-pw/ordertest-core
 
 > This file is the single source of truth for any AI coding agent (Copilot, Cursor, OpenCode, Claude, etc.)
 > operating in this repository. Read it fully before making any change.
@@ -52,7 +52,7 @@
 
 ## Project Overview
 
-**Package**: `@playwright-ordertest/core`
+**Package**: `@jimicze-pw/ordertest-core`
 **Purpose**: Playwright Test plugin that enables deterministic, user-defined test execution ordering across files and test methods. Supports `serial`, `parallel`, and `fullyParallel` execution modes while preserving order guarantees even under worker distribution and CI sharding.
 
 **Key mechanism**: The plugin is a **config transformer** — it reads a user-defined ordered test manifest (inline or external file) and generates the correct Playwright `projects[]` array with `dependencies`, `testMatch`, `workers`, and execution mode settings. Playwright's own scheduler then enforces the ordering natively. No internal patching.

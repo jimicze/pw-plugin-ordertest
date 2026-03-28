@@ -1,5 +1,5 @@
 /**
- * AFTER: Migrated to @playwright-ordertest/core.
+ * AFTER: Migrated to @jimicze-pw/ordertest-core.
  *
  * Changes from the standard config:
  * 1. Import defineOrderedConfig instead of defineConfig
@@ -9,7 +9,7 @@
  * The plugin generates Playwright projects with dependencies to
  * enforce the order. All standard Playwright features still work.
  */
-import { defineOrderedConfig } from '@playwright-ordertest/core';
+import { defineOrderedConfig } from '@jimicze-pw/ordertest-core';
 
 export default defineOrderedConfig({
   testDir: './tests',

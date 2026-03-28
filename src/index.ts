@@ -1,12 +1,12 @@
 /**
- * @playwright-ordertest/core
+ * @jimicze-pw/ordertest-core
  *
  * Playwright Test plugin for deterministic, user-defined test execution ordering.
  *
  * @example
  * ```typescript
  * // playwright.config.ts
- * import { defineOrderedConfig } from '@playwright-ordertest/core';
+ * import { defineOrderedConfig } from '@jimicze-pw/ordertest-core';
  *
  * export default defineOrderedConfig({
  *   orderedTests: {

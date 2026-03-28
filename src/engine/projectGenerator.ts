@@ -1,5 +1,5 @@
 /**
- * Project generator for @playwright-ordertest/core.
+ * Project generator for @jimicze-pw/ordertest-core.
  *
  * Routes each sequence to the correct execution strategy and assembles the final
  * Playwright `projects[]` array. Also provides helpers for extracting the set of

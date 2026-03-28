@@ -1,6 +1,6 @@
 # Basic Serial Example
 
-The simplest `@playwright-ordertest/core` setup — a serial checkout flow.
+The simplest `@jimicze-pw/ordertest-core` setup — a serial checkout flow.
 
 ## What This Shows
 

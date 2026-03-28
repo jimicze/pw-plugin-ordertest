@@ -1,25 +1,11 @@
 # Changelog
 
-All notable changes to `@playwright-ordertest/core` will be documented in this file.
+All notable changes to `@jimicze-pw/ordertest-core` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
-
-## [Unreleased]
-
-### Removed
-
-- **BREAKING**: Removed `orderedHtmlReporter` — the built-in Playwright HTML reporter works out of the box with ordered test projects
-- **BREAKING**: Removed `customHtmlReporter` and all related types (`ReportData`, `CustomHtmlReporterOptions`)
-- Removed `sequenceTracker` module (was internal to reporters)
-- Removed subpath exports `@playwright-ordertest/core/reporter` and `@playwright-ordertest/core/custom-reporter`
-
-### Changed
-
-- Package is now a pure config transformer with no reporter component
-- `SequenceMetadata` and `OrderTestProjectMetadata` types are retained as public API for custom tooling
 
 ## [0.1.0] — 2026-03-27
 
@@ -33,15 +19,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - External manifest loading from JSON, YAML, and TypeScript files
 - Auto-discovery of `ordertest.config.{ts,json,yaml,yml}` in project root
 - Per-file and per-sequence test filtering via `tests[]` and `tags[]`
-- Ordered HTML reporter (`orderedHtmlReporter`) wrapping Playwright's built-in HTML reporter
-- Sequence tracker for per-sequence progress tracking in reporters
 - Pino-based persistent activity logging to `.ordertest/activity.log`
 - Log rotation via pino-roll (configurable `maxSize` and `maxFiles`)
 - Debug console output to stderr via `[ordertest:debug]` prefix
 - Env var support: `ORDERTEST_LOG_LEVEL`, `ORDERTEST_LOG_DIR`, `ORDERTEST_LOG_STDOUT`, `ORDERTEST_DEBUG`, `PLAYWRIGHT_SHARD`
 - Full TypeScript support with dual ESM/CJS output
 - JSON Schema for external manifest auto-completion (`schema/ordertest-manifest.schema.json`)
-- 493 tests (459 unit + 34 integration) with full coverage of all execution modes and shard strategies
+- 476 tests (442 unit + 34 integration) with full coverage of all execution modes and shard strategies
 
-[Unreleased]: https://github.com/playwright-ordertest/core/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/playwright-ordertest/core/releases/tag/v0.1.0
+### Removed
+
+- **BREAKING**: Removed `orderedHtmlReporter` — the built-in Playwright HTML reporter works out of the box with ordered test projects
+- **BREAKING**: Removed `customHtmlReporter` and all related types (`ReportData`, `CustomHtmlReporterOptions`)
+- Removed `sequenceTracker` module (was internal to reporters)
+- Removed subpath exports `@jimicze-pw/ordertest-core/reporter` and `@jimicze-pw/ordertest-core/custom-reporter`
+
+### Changed
+
+- Package is now a pure config transformer with no reporter component
+- `SequenceMetadata` and `OrderTestProjectMetadata` types are retained as public API for custom tooling
+
+[0.1.0]: https://github.com/jimicze/pw-plugin-ordertest/releases/tag/v0.1.0

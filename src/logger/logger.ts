@@ -1,5 +1,5 @@
 /**
- * Persistent structured logger for @playwright-ordertest/core.
+ * Persistent structured logger for @jimicze-pw/ordertest-core.
  *
  * Provides two output channels:
  * 1. Pino JSON file logging to `.ordertest/activity.log` (structured, for post-mortem analysis)

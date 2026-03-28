@@ -1,5 +1,5 @@
 /**
- * Test-level filter generation for @playwright-ordertest/core.
+ * Test-level filter generation for @jimicze-pw/ordertest-core.
  *
  * Generates Playwright-compatible `grep` RegExp patterns from ordered sequence
  * test-name lists and/or tag lists. The produced patterns are passed directly to

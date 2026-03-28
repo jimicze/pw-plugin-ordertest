@@ -1,8 +1,8 @@
-# @playwright-ordertest/core
+# @jimicze-pw/ordertest-core
 
 A Playwright Test plugin that enforces deterministic, user-defined test execution ordering across files and test methods. Uses Playwright's native project dependency mechanism — no monkey-patching.
 
-[![npm version](https://img.shields.io/npm/v/@playwright-ordertest/core)](https://www.npmjs.com/package/@playwright-ordertest/core)
+[![npm version](https://img.shields.io/npm/v/@jimicze-pw/ordertest-core)](https://www.npmjs.com/package/@jimicze-pw/ordertest-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Playwright >=1.40.0](https://img.shields.io/badge/playwright-%3E%3D1.40.0-green)](https://playwright.dev)
 
@@ -19,12 +19,12 @@ A Playwright Test plugin that enforces deterministic, user-defined test executio
 ## Quick Start
 
 ```bash
-pnpm add -D @playwright-ordertest/core
+pnpm add -D @jimicze-pw/ordertest-core
 ```
 
 ```typescript
 // playwright.config.ts
-import { defineOrderedConfig } from '@playwright-ordertest/core';
+import { defineOrderedConfig } from '@jimicze-pw/ordertest-core';
 
 export default defineOrderedConfig({
   testDir: './tests',
@@ -61,7 +61,7 @@ That's it. Playwright will now run `auth.spec.ts` → `cart.spec.ts` → `checko
 Synchronous entry point. Use when all sequences are defined inline.
 
 ```typescript
-import { defineOrderedConfig } from '@playwright-ordertest/core';
+import { defineOrderedConfig } from '@jimicze-pw/ordertest-core';
 
 export default defineOrderedConfig({
   testDir: './tests',
@@ -75,7 +75,7 @@ export default defineOrderedConfig({
 Async entry point. Required when loading an external manifest file.
 
 ```typescript
-import { defineOrderedConfigAsync } from '@playwright-ordertest/core';
+import { defineOrderedConfigAsync } from '@jimicze-pw/ordertest-core';
 
 export default defineOrderedConfigAsync({
   testDir: './tests',
@@ -227,12 +227,325 @@ The HTML report shows your tests organized by the generated project names (e.g.,
 
 The plugin writes structured JSON logs to `.ordertest/activity.log` via pino.
 
+---
+
+## Environment Variables
+
 | Env var | Description |
 |---------|-------------|
 | `ORDERTEST_LOG_LEVEL` | Override log level (`silent`, `error`, `warn`, `info`, `debug`) |
-| `ORDERTEST_LOG_DIR` | Override log directory |
+| `ORDERTEST_LOG_DIR` | Override log directory (default: `.ordertest/`) |
 | `ORDERTEST_LOG_STDOUT` | Set to `true` to also emit logs to stdout |
 | `ORDERTEST_DEBUG` | Set to `true` to enable `[ordertest:debug]` human-readable output on stderr |
+| `ORDERTEST_MANIFEST` | Override manifest file path (takes priority over `orderedTests.manifest` and auto-discovery). Requires `defineOrderedConfigAsync`. |
+| `ORDERTEST_SHARD_STRATEGY` | Override shard strategy (`collapse`, `warn`, `fail`). Takes priority over the `shardStrategy` config option. |
+| `PLAYWRIGHT_SHARD` | Set to `current/total` (e.g., `2/5`) for reliable shard detection in worker processes. Required because `--shard` CLI args are not forwarded to workers. |
+
+---
+
+## Error Handling
+
+All plugin errors extend `OrderTestError`, which provides a `context` field with structured metadata. You can catch all plugin errors with a single `instanceof OrderTestError` check, or target specific error types.
+
+```typescript
+import {
+  OrderTestError,
+  OrderTestConfigError,
+  OrderTestValidationError,
+  OrderTestShardError,
+  OrderTestManifestError,
+} from '@jimicze-pw/ordertest-core';
+
+try {
+  const config = defineOrderedConfig({ /* ... */ });
+} catch (error) {
+  if (error instanceof OrderTestConfigError) {
+    console.error('Config error:', error.message);
+    console.error('Context:', error.context);
+    // error.context may include: { filePath, sequenceName, testDir, absolutePath }
+  }
+}
+```
+
+| Error class | When thrown |
+|-------------|------------|
+| `OrderTestError` | Base class for all plugin errors. Has `context: Record<string, unknown>`. |
+| `OrderTestConfigError` | Invalid plugin configuration (e.g., missing files, conflicting options, sync API used with manifest). |
+| `OrderTestValidationError` | Zod schema validation failure on config or manifest. `context` includes `zodErrors`. |
+| `OrderTestShardError` | Shard strategy is `'fail'` and sharding was detected. `context` includes `shard` and `strategy`. |
+| `OrderTestManifestError` | Manifest file not found, unreadable, unparseable, or has invalid content. `context` includes `filePath` and `format`. |
+
+### File existence validation
+
+`defineOrderedConfig` validates that every file referenced in your sequences actually exists on disk before generating projects. If a file is missing, it throws `OrderTestConfigError` with a message that includes:
+- The file path
+- The sequence name
+- The testDir it searched in
+- The resolved absolute path
+
+```
+OrderTestConfigError: File "missing.spec.ts" in sequence "checkout-flow" does not exist.
+  Searched in testDir: "./tests" (resolved to: "/absolute/path/tests/missing.spec.ts")
+```
+
+---
+
+## Advanced API
+
+Beyond `defineOrderedConfig` and `defineOrderedConfigAsync`, the package exports lower-level utilities for building custom tooling.
+
+### Engine
+
+```typescript
+import {
+  generateProjects,
+  collectOrderedFiles,
+  generateUnorderedProject,
+} from '@jimicze-pw/ordertest-core';
+```
+
+| Export | Description |
+|--------|-------------|
+| `generateProjects(sequences, logger)` | Generate Playwright project configs from sequence definitions |
+| `collectOrderedFiles(sequences)` | Collect all file paths claimed by ordered sequences |
+| `generateUnorderedProject(sequences, logger)` | Build a passthrough project for files not in any sequence |
+
+### Shard Guard
+
+```typescript
+import {
+  detectShardConfig,
+  resolveShardStrategy,
+  applyShardGuard,
+} from '@jimicze-pw/ordertest-core';
+```
+
+| Export | Description |
+|--------|-------------|
+| `detectShardConfig(configShard?)` | Detect sharding from config and/or environment variables |
+| `resolveShardStrategy(configStrategy?)` | Resolve the effective shard strategy (config + env var) |
+| `applyShardGuard(options)` | Apply shard protection to generated projects |
+
+### Test Filter
+
+```typescript
+import { buildGrepPattern, escapeRegex } from '@jimicze-pw/ordertest-core';
+```
+
+| Export | Description |
+|--------|-------------|
+| `buildGrepPattern(tests)` | Build a Playwright `grep` regex from test name strings |
+| `escapeRegex(str)` | Escape special regex characters in a string |
+
+### Validation
+
+```typescript
+import { validateConfig, validateManifest } from '@jimicze-pw/ordertest-core';
+```
+
+| Export | Description |
+|--------|-------------|
+| `validateConfig(config, logger?)` | Validate an `OrderedTestPluginConfig` object against the Zod schema |
+| `validateManifest(data, logger?)` | Validate raw manifest data against the manifest Zod schema |
+
+### Manifest Loading
+
+```typescript
+import { loadManifest, discoverManifest } from '@jimicze-pw/ordertest-core';
+```
+
+| Export | Description |
+|--------|-------------|
+| `loadManifest(options)` | Load and validate a manifest file (JSON/YAML/TS). Respects `ORDERTEST_MANIFEST` env var. |
+| `discoverManifest(rootDir, logger?)` | Auto-discover a manifest file in a directory |
+
+### Logger
+
+```typescript
+import {
+  createLogger,
+  createSilentLogger,
+  debugConsole,
+  isDebugEnabled,
+} from '@jimicze-pw/ordertest-core';
+```
+
+| Export | Description |
+|--------|-------------|
+| `createLogger(options)` | Create a pino logger instance with file transport |
+| `createSilentLogger()` | Create a no-op logger (for testing or suppressing output) |
+| `debugConsole(msg)` | Write a `[ordertest:debug]` message to stderr (when debug is enabled) |
+| `isDebugEnabled()` | Check whether debug console output is active |
+
+### Constants
+
+```typescript
+import {
+  PROJECT_NAME_PREFIX,       // 'ordertest'
+  UNORDERED_PROJECT_NAME,    // 'ordertest:unordered'
+  DEBUG_PREFIX,              // '[ordertest:debug]'
+  DEFAULT_LOG_DIR,           // '.ordertest'
+  DEFAULT_LOG_FILE,          // 'activity.log'
+  DEFAULT_LOG_LEVEL,         // 'info'
+  DEFAULT_LOG_MAX_SIZE,      // '10m'
+  DEFAULT_LOG_MAX_FILES,     // 5
+  DEFAULT_SHARD_STRATEGY,    // 'collapse'
+} from '@jimicze-pw/ordertest-core';
+```
+
+### Types
+
+All TypeScript types are exported for consumers building typed integrations:
+
+```typescript
+import type {
+  ExecutionMode,
+  FileEntry,
+  FileSpecification,
+  LogLevel,
+  LogRotationConfig,
+  OrderedTestManifest,
+  OrderedTestPluginConfig,
+  OrderTestProjectMetadata,
+  SequenceDefinition,
+  SequenceMetadata,
+  ShardDetectionSource,
+  ShardInfo,
+  ShardStrategy,
+  PlaywrightConfigWithOrderedTests,
+  TransformedConfig,
+  GeneratedProject,
+  ShardGuardOptions,
+  Logger,
+} from '@jimicze-pw/ordertest-core';
+```
+
+---
+
+## Migration Guide
+
+### From standard `defineConfig` to `defineOrderedConfig`
+
+**Before** (standard Playwright config with manual project dependencies):
+
+```typescript
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests',
+  projects: [
+    {
+      name: 'auth',
+      testMatch: 'auth.spec.ts',
+    },
+    {
+      name: 'cart',
+      testMatch: 'cart.spec.ts',
+      dependencies: ['auth'],
+    },
+    {
+      name: 'checkout',
+      testMatch: 'checkout.spec.ts',
+      dependencies: ['cart'],
+    },
+  ],
+});
+```
+
+**After** (using `defineOrderedConfig`):
+
+```typescript
+// playwright.config.ts
+import { defineOrderedConfig } from '@jimicze-pw/ordertest-core';
+
+export default defineOrderedConfig({
+  testDir: './tests',
+  orderedTests: {
+    sequences: [
+      {
+        name: 'checkout-flow',
+        mode: 'serial',
+        files: ['auth.spec.ts', 'cart.spec.ts', 'checkout.spec.ts'],
+      },
+    ],
+  },
+});
+```
+
+### Key differences
+
+| Aspect | Before (manual) | After (plugin) |
+|--------|-----------------|----------------|
+| **Ordering** | Manually chain `dependencies` | Declare file order in `files` array |
+| **Adding a file** | Add project + wire up dependencies | Add one entry to `files` |
+| **Shard safety** | Manual handling required | Built-in shard guard (auto-collapse) |
+| **Execution mode** | Set `workers`/`fullyParallel` per project | Set `mode` once per sequence |
+| **Unordered tests** | Must manually exclude ordered files | Automatic passthrough project |
+| **File validation** | No validation | Files checked at config time |
+
+### Step-by-step migration
+
+1. **Install the plugin**:
+   ```bash
+   pnpm add -D @jimicze-pw/ordertest-core
+   ```
+
+2. **Replace `defineConfig` with `defineOrderedConfig`**:
+   ```typescript
+   // Before
+   import { defineConfig } from '@playwright/test';
+   export default defineConfig({ ... });
+
+   // After
+   import { defineOrderedConfig } from '@jimicze-pw/ordertest-core';
+   export default defineOrderedConfig({ ... });
+   ```
+
+3. **Move project chains into sequences**: Replace your manual `projects` array with `orderedTests.sequences`. Each chain of dependent projects becomes one sequence.
+
+4. **Remove manual `testMatch`/`dependencies`**: The plugin generates these automatically from the `files` array.
+
+5. **Keep unordered tests as-is**: Any test files not listed in a sequence are automatically picked up by the `ordertest:unordered` passthrough project.
+
+6. **Add shard protection for CI**: If you use `--shard`, set the `PLAYWRIGHT_SHARD` env var:
+   ```yaml
+   - run: npx playwright test --shard=${{ matrix.shard }}/4
+     env:
+       PLAYWRIGHT_SHARD: ${{ matrix.shard }}/4
+   ```
+
+### Using an external manifest
+
+For large test suites, move sequences out of `playwright.config.ts`:
+
+```typescript
+// playwright.config.ts
+import { defineOrderedConfigAsync } from '@jimicze-pw/ordertest-core';
+
+export default defineOrderedConfigAsync({
+  testDir: './tests',
+  orderedTests: {
+    manifest: './ordertest.config.json',
+  },
+});
+```
+
+```json
+// ordertest.config.json
+{
+  "sequences": [
+    { "name": "checkout-flow", "mode": "serial", "files": ["auth.spec.ts", "cart.spec.ts", "checkout.spec.ts"] },
+    { "name": "profile-flow", "mode": "parallel", "files": ["profile.spec.ts", "settings.spec.ts"] }
+  ]
+}
+```
+
+Or override the manifest path via environment variable:
+
+```bash
+ORDERTEST_MANIFEST=./custom-manifest.json npx playwright test
+```
 
 ---
 

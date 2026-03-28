@@ -1,5 +1,5 @@
 /**
- * Serial execution strategy for @playwright-ordertest/core.
+ * Serial execution strategy for @jimicze-pw/ordertest-core.
  *
  * Generates a chain of Playwright project configs where each project:
  * - Covers exactly one test file
@@ -10,12 +10,7 @@
  * exact order defined in the sequence, with no parallelism at any level.
  */
 
-import type {
-  FileEntry,
-  FileSpecification,
-  OrderTestProjectMetadata,
-  SequenceDefinition,
-} from '../config/types.js';
+import type { FileEntry, OrderTestProjectMetadata, SequenceDefinition } from '../config/types.js';
 import { PROJECT_NAME_PREFIX } from '../config/types.js';
 import { type Logger, debugConsole } from '../logger/logger.js';
 import { buildGrepPattern } from './testFilter.js';
@@ -56,7 +51,7 @@ export function resolveFileEntry(entry: FileEntry): {
     return { file: entry };
   }
 
-  const spec = entry as FileSpecification;
+  const spec = entry;
   return {
     file: spec.file,
     tests: spec.tests,

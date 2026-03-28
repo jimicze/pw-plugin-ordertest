@@ -8,6 +8,7 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 import { expect, test } from '@playwright/test';
@@ -38,22 +39,32 @@ test.describe('exports — main API', () => {
   });
 
   test('defineOrderedConfig returns an object with projects array when given sequences', () => {
-    const result = mod.defineOrderedConfig({
-      orderedTests: {
-        logLevel: 'silent',
-        sequences: [
-          {
-            name: 'smoke-seq',
-            mode: 'serial',
-            files: ['a.spec.ts', 'b.spec.ts'],
-          },
-        ],
-      },
-    });
-    expect(result).toBeDefined();
-    expect(typeof result).toBe('object');
-    expect(Array.isArray(result.projects)).toBe(true);
-    expect(result.projects.length).toBeGreaterThan(0);
+    // Create real temp files so file existence validation passes
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ordertest-smoke-'));
+    try {
+      fs.writeFileSync(path.join(tmpDir, 'a.spec.ts'), '// stub\n');
+      fs.writeFileSync(path.join(tmpDir, 'b.spec.ts'), '// stub\n');
+
+      const result = mod.defineOrderedConfig({
+        testDir: tmpDir,
+        orderedTests: {
+          logLevel: 'silent',
+          sequences: [
+            {
+              name: 'smoke-seq',
+              mode: 'serial',
+              files: ['a.spec.ts', 'b.spec.ts'],
+            },
+          ],
+        },
+      });
+      expect(result).toBeDefined();
+      expect(typeof result).toBe('object');
+      expect(Array.isArray(result.projects)).toBe(true);
+      expect(result.projects.length).toBeGreaterThan(0);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 
   test('defineOrderedConfig passthrough mode returns config as-is when no sequences', () => {

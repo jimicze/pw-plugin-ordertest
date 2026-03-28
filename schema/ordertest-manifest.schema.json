@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/playwright-ordertest/core/schema/ordertest-manifest.schema.json",
+  "$id": "https://github.com/jimicze/pw-plugin-ordertest/schema/ordertest-manifest.schema.json",
   "title": "OrderTest Manifest",
-  "description": "External manifest file for @playwright-ordertest/core defining ordered test sequences.",
+  "description": "External manifest file for @jimicze-pw/ordertest-core defining ordered test sequences.",
   "type": "object",
   "required": ["sequences"],
   "additionalProperties": false,

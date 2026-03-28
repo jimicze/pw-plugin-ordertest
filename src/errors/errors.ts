@@ -1,12 +1,12 @@
 /**
- * Custom error classes for @playwright-ordertest/core.
+ * Custom error classes for @jimicze-pw/ordertest-core.
  *
  * All plugin errors extend OrderTestError for easy catch-all handling.
  * Error messages are actionable — they tell the user what went wrong and how to fix it.
  */
 
 /**
- * Base error class for all @playwright-ordertest/core errors.
+ * Base error class for all @jimicze-pw/ordertest-core errors.
  * Provides a `context` field for structured error metadata.
  */
 export class OrderTestError extends Error {

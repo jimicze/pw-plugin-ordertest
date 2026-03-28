@@ -246,6 +246,15 @@ _No entries yet._
 **Rationale**: The standard Playwright HTML reporter already works perfectly with ordered test projects because project names (e.g., `ordertest:checkout-flow:0`) appear naturally in the report. Custom reporters added complexity without meaningful value. The generated project names and dependency chains give users full visibility into execution order via any standard Playwright reporter.
 **Impact**: Removed `src/reporter/` directory, subpath exports, and all reporter-related types/tests. Kept `SequenceMetadata` and `OrderTestProjectMetadata` as public API types for potential custom tooling.
 
+### testDir is read from userProjects[0], not top-level config
+
+**Date**: 2026-03-28
+**Severity**: medium
+**Context**: Writing tests for file existence validation in `defineOrderedConfig`.
+**Problem**: `testDir` in Playwright config is a top-level field, but `defineOrderedConfig` reads it from the destructured config. However, `transformConfig` internally reads `testDir` from `userProjects?.[0]?.testDir`, not from the top-level config. Tests that pass `testDir` at the top level but not in `projects` will use `process.cwd()` for file validation instead.
+**Fix/Workaround**: In tests, pass `testDir` via `projects: [{ testDir: '/some/path' }]` to match how `transformConfig` reads it. Alternatively, pass it at the top level — `defineOrderedConfig` passes it through the `restConfig`.
+**Prevention**: Be aware of the dual `testDir` sources. The `transformConfig` function uses `userProjects[0].testDir` for project generation, while top-level `testDir` is passed through to the output config.
+
 ---
 
 ## Performance Notes

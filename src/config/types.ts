@@ -1,5 +1,5 @@
 /**
- * Core type definitions for @playwright-ordertest/core.
+ * Core type definitions for @jimicze-pw/ordertest-core.
  *
  * All types used across the plugin are centralized here to prevent circular imports.
  * This file has no internal dependencies.

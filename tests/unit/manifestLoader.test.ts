@@ -328,3 +328,82 @@ test.describe('loadManifest — TypeScript manifest', () => {
     );
   });
 });
+
+// ---------------------------------------------------------------------------
+// loadManifest — ORDERTEST_MANIFEST env var
+// ---------------------------------------------------------------------------
+
+test.describe('loadManifest — ORDERTEST_MANIFEST env var', () => {
+  let tmpDir: string;
+
+  test.beforeEach(async () => {
+    tmpDir = await makeTempDir();
+  });
+
+  test.afterEach(async () => {
+    Reflect.deleteProperty(process.env, 'ORDERTEST_MANIFEST');
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  test('env var takes priority over explicit manifestPath', async () => {
+    // Write two distinct manifests so we can tell which one was loaded
+    const envContent = JSON.stringify({
+      sequences: [{ name: 'from-env', mode: 'serial', files: ['env.spec.ts'] }],
+    });
+    const optContent = JSON.stringify({
+      sequences: [{ name: 'from-option', mode: 'serial', files: ['opt.spec.ts'] }],
+    });
+    const envPath = path.join(tmpDir, 'env-manifest.json');
+    const optPath = path.join(tmpDir, 'opt-manifest.json');
+    await fs.writeFile(envPath, envContent);
+    await fs.writeFile(optPath, optContent);
+
+    process.env.ORDERTEST_MANIFEST = envPath;
+
+    const manifest = await loadManifest({ manifestPath: optPath, rootDir: tmpDir });
+    expect(manifest.sequences[0]?.name).toBe('from-env');
+  });
+
+  test('empty env var is ignored (falls back to manifestPath)', async () => {
+    const jsonPath = path.join(tmpDir, 'manifest.json');
+    await fs.writeFile(jsonPath, VALID_JSON);
+
+    process.env.ORDERTEST_MANIFEST = '';
+
+    const manifest = await loadManifest({ manifestPath: jsonPath, rootDir: tmpDir });
+    expect(manifest.sequences).toHaveLength(1);
+    expect(manifest.sequences[0]?.name).toBe('my-sequence');
+  });
+
+  test('env var path is resolved against rootDir', async () => {
+    const subDir = path.join(tmpDir, 'sub');
+    await fs.mkdir(subDir, { recursive: true });
+    await fs.writeFile(path.join(subDir, 'env-manifest.json'), VALID_JSON);
+
+    process.env.ORDERTEST_MANIFEST = 'sub/env-manifest.json';
+
+    const manifest = await loadManifest({ rootDir: tmpDir });
+    expect(manifest.sequences).toHaveLength(1);
+    expect(manifest.sequences[0]?.name).toBe('my-sequence');
+  });
+
+  test('throws OrderTestManifestError when env var points to non-existent file', async () => {
+    process.env.ORDERTEST_MANIFEST = 'nonexistent.json';
+
+    await expect(loadManifest({ rootDir: tmpDir })).rejects.toThrow(OrderTestManifestError);
+  });
+
+  test('error message mentions ORDERTEST_MANIFEST when env var is used and file is missing', async () => {
+    process.env.ORDERTEST_MANIFEST = 'nonexistent.json';
+
+    let errorMessage = '';
+    try {
+      await loadManifest({ rootDir: tmpDir });
+    } catch (e) {
+      if (e instanceof Error) {
+        errorMessage = e.message;
+      }
+    }
+    expect(errorMessage).toContain('ORDERTEST_MANIFEST');
+  });
+});

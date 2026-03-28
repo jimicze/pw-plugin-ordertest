@@ -39,7 +39,7 @@ importers:
 
   examples/basic-serial:
     dependencies:
-      '@playwright-ordertest/core':
+      '@jimicze-pw/ordertest-core':
         specifier: workspace:*
         version: link:../..
       '@playwright/test':
@@ -48,7 +48,7 @@ importers:
 
   examples/external-manifest:
     dependencies:
-      '@playwright-ordertest/core':
+      '@jimicze-pw/ordertest-core':
         specifier: workspace:*
         version: link:../..
       '@playwright/test':
@@ -57,7 +57,7 @@ importers:
 
   examples/migration-guide:
     dependencies:
-      '@playwright-ordertest/core':
+      '@jimicze-pw/ordertest-core':
         specifier: workspace:*
         version: link:../..
       '@playwright/test':
@@ -66,7 +66,7 @@ importers:
 
   examples/mixed-ordered-unordered:
     dependencies:
-      '@playwright-ordertest/core':
+      '@jimicze-pw/ordertest-core':
         specifier: workspace:*
         version: link:../..
       '@playwright/test':
@@ -75,7 +75,7 @@ importers:
 
   examples/multiple-sequences:
     dependencies:
-      '@playwright-ordertest/core':
+      '@jimicze-pw/ordertest-core':
         specifier: workspace:*
         version: link:../..
       '@playwright/test':
@@ -84,7 +84,7 @@ importers:
 
   examples/test-level-filtering:
     dependencies:
-      '@playwright-ordertest/core':
+      '@jimicze-pw/ordertest-core':
         specifier: workspace:*
         version: link:../..
       '@playwright/test':
@@ -93,7 +93,7 @@ importers:
 
   examples/with-html-reporter:
     dependencies:
-      '@playwright-ordertest/core':
+      '@jimicze-pw/ordertest-core':
         specifier: workspace:*
         version: link:../..
       '@playwright/test':

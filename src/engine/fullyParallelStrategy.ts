@@ -1,5 +1,5 @@
 /**
- * FullyParallel execution strategy for @playwright-ordertest/core.
+ * FullyParallel execution strategy for @jimicze-pw/ordertest-core.
  *
  * Files in the sequence run in defined order (chained via project dependencies),
  * while tests *within* each file run fully in parallel — each test gets its own
