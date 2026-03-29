@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.1] — 2026-03-29
+
+### Fixed
+
+- CI: `pnpm add -D` override step now uses `-w` flag for workspace root compatibility
+- CI: replaced `import.meta.dirname` with `fileURLToPath` in smoke tests for Node 18 compatibility
+- Release: added `NODE_AUTH_TOKEN` env var to publish step (fixes npm 404 on OIDC publish)
+
+---
+
 ## [0.2.0] — 2026-03-29
 
 ### Added

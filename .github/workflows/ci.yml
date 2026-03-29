@@ -31,7 +31,7 @@ jobs:
 
       - name: Override Playwright version
         if: matrix.pw != 'latest'
-        run: pnpm add -D @playwright/test@${{ matrix.pw }}
+        run: pnpm add -wD @playwright/test@${{ matrix.pw }}
         shell: bash
 
       - name: Install Playwright browsers

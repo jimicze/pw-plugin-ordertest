@@ -10,10 +10,11 @@
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { expect, test } from '@playwright/test';
 
-const PROJECT_ROOT = path.resolve(import.meta.dirname, '../..');
+const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const DIST_INDEX = path.resolve(PROJECT_ROOT, 'dist/index.js');
 
 // Skip all smoke tests if dist/ hasn't been built yet
