@@ -1,14 +1,11 @@
 import { expect, test } from '@playwright/test';
 
 test('add item to cart', async ({ page }) => {
-  // Runs only after ALL auth.spec.ts tests pass — this demonstrates
-  // why ordering matters: if login fails, cart tests also fail.
   await page.goto('/');
   await page.locator('[data-test="username"]').fill('standard_user');
   await page.locator('[data-test="password"]').fill('secret_sauce');
   await page.locator('[data-test="login-button"]').click();
 
-  // Add the Sauce Labs Backpack to the cart
   await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
   await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
 });
@@ -21,7 +18,6 @@ test('cart contains the added item', async ({ page }) => {
 
   await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
 
-  // Navigate to cart and verify the item is there
   await page.locator('.shopping_cart_link').click();
   await expect(page).toHaveURL(/cart/);
   await expect(page.locator('.cart_item')).toHaveCount(1);

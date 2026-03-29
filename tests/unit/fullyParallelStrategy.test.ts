@@ -241,6 +241,45 @@ test.describe('generateFullyParallelProjects — metadata', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Browser field → use.browserName
+// ---------------------------------------------------------------------------
+
+test.describe('generateFullyParallelProjects — browser field', () => {
+  test('use is undefined when sequence.browser is not set', () => {
+    const seq = makeSequence({ files: ['a.spec.ts'] });
+    const [project] = generateFullyParallelProjects(seq) as [GeneratedProject];
+
+    expect(project.use).toBeUndefined();
+  });
+
+  test('use.browserName is set when sequence.browser is specified', () => {
+    const seq = makeSequence({ files: ['a.spec.ts'], browser: 'firefox' });
+    const [project] = generateFullyParallelProjects(seq) as [GeneratedProject];
+
+    expect(project.use).toEqual({ browserName: 'firefox' });
+  });
+
+  test('browser propagates to all projects in the chain', () => {
+    const seq = makeSequence({
+      files: ['a.spec.ts', 'b.spec.ts', 'c.spec.ts'],
+      browser: 'webkit',
+    });
+    const projects = generateFullyParallelProjects(seq);
+
+    for (const project of projects) {
+      expect(project.use).toEqual({ browserName: 'webkit' });
+    }
+  });
+
+  test('browser value is preserved exactly as provided', () => {
+    const seq = makeSequence({ files: ['a.spec.ts'], browser: 'chromium' });
+    const [project] = generateFullyParallelProjects(seq) as [GeneratedProject];
+
+    expect(project.use?.browserName).toBe('chromium');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Empty sequence
 // ---------------------------------------------------------------------------
 

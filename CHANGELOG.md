@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.0] — 2026-03-29
+
+### Added
+
+- `sequence.browser` field now produces `use: { browserName }` on generated Playwright projects, allowing per-sequence browser selection (e.g., `browser: 'firefox'`)
+- `use` field on `GeneratedProject` interface — strategies can now set arbitrary Playwright `use` options on generated projects
+- `toPlaywrightProject()` propagates `use` from generated projects to the final Playwright config
+- 16 new unit tests for browser field propagation across all three strategies and the config transformer
+
+### Fixed
+
+- All 8 example configs now correctly place `trace` and `screenshot` inside `use: {}` (Playwright ignores these at config root level)
+- `with-html-reporter` example: moved `trace: 'on'` and `screenshot: 'on'` from root level into `use` block
+- All examples rewritten to use saucedemo.com demo site with real selectors and assertions
+
+---
+
 ## [0.1.0] — 2026-03-27
 
 ### Added
@@ -39,4 +56,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Package is now a pure config transformer with no reporter component
 - `SequenceMetadata` and `OrderTestProjectMetadata` types are retained as public API for custom tooling
 
+[0.2.0]: https://github.com/jimicze/pw-plugin-ordertest/releases/tag/v0.2.0
 [0.1.0]: https://github.com/jimicze/pw-plugin-ordertest/releases/tag/v0.1.0

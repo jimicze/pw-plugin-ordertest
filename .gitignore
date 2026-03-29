@@ -6,3 +6,4 @@ dist/
 **/test-results/
 blob-report/
 **/.DS_Store
+docs/

@@ -1,33 +1,41 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('Checkout', () => {
-  test('fill in shipping details', async ({ page }) => {
+  test('fill in checkout information', async ({ page }) => {
     // The HTML report will show this under project "ordertest:checkout-flow:2"
-    await page.goto('https://example-shop.test/checkout/shipping');
+    await page.goto('/');
+    await page.locator('[data-test="username"]').fill('standard_user');
+    await page.locator('[data-test="password"]').fill('secret_sauce');
+    await page.locator('[data-test="login-button"]').click();
 
-    await page.getByLabel('Full name').fill('Jane Doe');
-    await page.getByLabel('Address line 1').fill('123 Main Street');
-    await page.getByLabel('City').fill('Springfield');
-    await page.getByLabel('Postal code').fill('12345');
-    await page.getByLabel('Country').selectOption('US');
+    await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+    await page.locator('.shopping_cart_link').click();
+    await page.locator('[data-test="checkout"]').click();
 
-    await page.getByRole('button', { name: 'Continue to payment' }).click();
+    await page.locator('[data-test="firstName"]').fill('Jane');
+    await page.locator('[data-test="lastName"]').fill('Doe');
+    await page.locator('[data-test="postalCode"]').fill('12345');
+    await page.locator('[data-test="continue"]').click();
 
-    await expect(page).toHaveURL('/checkout/payment');
-    await expect(page.getByText('Shipping to: 123 Main Street')).toBeVisible();
+    await expect(page).toHaveURL(/checkout-step-two/);
   });
 
-  test('confirm order', async ({ page }) => {
-    await page.goto('https://example-shop.test/checkout/payment');
+  test('confirm order and see thank you page', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('[data-test="username"]').fill('standard_user');
+    await page.locator('[data-test="password"]').fill('secret_sauce');
+    await page.locator('[data-test="login-button"]').click();
 
-    await page.getByLabel('Card number').fill('4242 4242 4242 4242');
-    await page.getByLabel('Expiry date').fill('12/28');
-    await page.getByLabel('CVC').fill('123');
+    await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+    await page.locator('.shopping_cart_link').click();
+    await page.locator('[data-test="checkout"]').click();
 
-    await page.getByRole('button', { name: 'Place order' }).click();
+    await page.locator('[data-test="firstName"]').fill('Jane');
+    await page.locator('[data-test="lastName"]').fill('Doe');
+    await page.locator('[data-test="postalCode"]').fill('12345');
+    await page.locator('[data-test="continue"]').click();
 
-    await expect(page).toHaveURL('/checkout/confirmation');
-    await expect(page.getByRole('heading', { name: 'Order confirmed!' })).toBeVisible();
-    await expect(page.getByTestId('order-number')).toBeVisible();
+    await page.locator('[data-test="finish"]').click();
+    await expect(page.locator('.complete-header')).toHaveText('Thank you for your order!');
   });
 });

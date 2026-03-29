@@ -3,13 +3,15 @@
 import { expect, test } from '@playwright/test';
 
 test('add item to cart', async ({ page }) => {
-  await page.goto('https://example.com/shop');
+  await page.goto('/');
+  await page.locator('[data-test="username"]').fill('standard_user');
+  await page.locator('[data-test="password"]').fill('secret_sauce');
+  await page.locator('[data-test="login-button"]').click();
 
-  await page.getByText('Wireless Headphones').click();
-  await expect(page.getByRole('heading', { name: 'Wireless Headphones' })).toBeVisible();
+  await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+  await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
 
-  await page.getByRole('button', { name: 'Add to cart' }).click();
-
-  await expect(page.getByRole('status')).toContainText('Item added to cart');
-  await expect(page.getByTestId('cart-count')).toHaveText('1');
+  await page.locator('.shopping_cart_link').click();
+  await expect(page).toHaveURL(/cart/);
+  await expect(page.locator('.cart_item')).toHaveCount(1);
 });

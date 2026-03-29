@@ -82,12 +82,13 @@ export function generateParallelProjects(
       ...(sequence.retries !== undefined ? { retries: sequence.retries } : {}),
       ...(sequence.timeout !== undefined ? { timeout: sequence.timeout } : {}),
       ...(grepPattern !== undefined ? { grep: grepPattern } : {}),
+      ...(sequence.browser !== undefined ? { use: { browserName: sequence.browser } } : {}),
     };
 
     projects.push(project);
 
     debugConsole(
-      `  → project[${index}] "${projectName}" file="${resolved.file}"${prevProjectName !== undefined ? ` deps=["${prevProjectName}"]` : ' deps=[]'}${sequence.workers !== undefined ? ` workers=${sequence.workers}` : ''}${grepPattern !== undefined ? ` grep=${String(grepPattern)}` : ''}`,
+      `  → project[${index}] "${projectName}" file="${resolved.file}"${prevProjectName !== undefined ? ` deps=["${prevProjectName}"]` : ' deps=[]'}${sequence.workers !== undefined ? ` workers=${sequence.workers}` : ''}${grepPattern !== undefined ? ` grep=${String(grepPattern)}` : ''}${sequence.browser !== undefined ? ` browser=${sequence.browser}` : ''}`,
     );
     logger?.debug(
       {
@@ -96,6 +97,7 @@ export function generateParallelProjects(
         dependencies: prevProjectName !== undefined ? [prevProjectName] : [],
         workers: sequence.workers,
         grep: grepPattern !== undefined ? String(grepPattern) : undefined,
+        browser: sequence.browser,
         stepIndex: index,
         totalSteps,
       },

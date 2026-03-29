@@ -1,30 +1,28 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('Shopping Cart', () => {
-  test('add product to cart', async ({ page }) => {
-    // The HTML report will show this under project "ordertest:checkout-flow:1"
-    await page.goto('https://example-shop.test/products/running-shoes');
+	test('add product to cart', async ({ page }) => {
+		// The HTML report will show this under project "ordertest:checkout-flow:1"
+		await page.goto('/');
+		await page.locator('[data-test="username"]').fill('standard_user');
+		await page.locator('[data-test="password"]').fill('secret_sauce');
+		await page.locator('[data-test="login-button"]').click();
 
-    await expect(page.getByRole('heading', { name: 'Running Shoes' })).toBeVisible();
-    await page.getByLabel('Size').selectOption('42');
-    await page.getByRole('button', { name: 'Add to cart' }).click();
+		await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+		await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
+	});
 
-    await expect(page.getByRole('status')).toHaveText('Item added to your cart');
-    await expect(page.getByTestId('cart-count')).toHaveText('1');
-  });
+	test('cart shows the added item', async ({ page }) => {
+		await page.goto('/');
+		await page.locator('[data-test="username"]').fill('standard_user');
+		await page.locator('[data-test="password"]').fill('secret_sauce');
+		await page.locator('[data-test="login-button"]').click();
 
-  test('update cart quantity', async ({ page }) => {
-    await page.goto('https://example-shop.test/cart');
+		await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+		await page.locator('.shopping_cart_link').click();
 
-    // Verify the item is in the cart
-    await expect(page.getByRole('row', { name: /Running Shoes/ })).toBeVisible();
-
-    // Increase quantity to 2
-    const quantityInput = page.getByRole('row', { name: /Running Shoes/ }).getByRole('spinbutton');
-    await quantityInput.fill('2');
-    await quantityInput.press('Tab');
-
-    await expect(page.getByTestId('cart-subtotal')).toContainText('$');
-    await expect(page.getByTestId('cart-count')).toHaveText('2');
-  });
+		await expect(page).toHaveURL(/cart/);
+		await expect(page.locator('.cart_item')).toHaveCount(1);
+		await expect(page.locator('.inventory_item_name')).toHaveText('Sauce Labs Backpack');
+	});
 });

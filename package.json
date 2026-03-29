@@ -1,6 +1,6 @@
 {
   "name": "@jimicze-pw/ordertest-core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Playwright Test plugin for deterministic, user-defined test execution ordering across files and test methods",
   "license": "MIT",
   "author": "jimicze",

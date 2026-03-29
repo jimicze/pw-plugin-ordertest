@@ -130,7 +130,7 @@ Either a plain file path string, or an object for per-file filtering:
 
 ## Shard Guard
 
-When Playwright shards are detected, ordered sequences need special handling because `projects[].dependencies` are **not enforced across shards**.
+When Playwright shards are detected, ordered sequences need special handling because `projects[].dependencies` are **not enforced across shards**. Each shard is an independent process — if a dependency chain is split across shards, ordering breaks silently.
 
 | Strategy | Behavior |
 |----------|----------|
@@ -138,14 +138,81 @@ When Playwright shards are detected, ordered sequences need special handling bec
 | `warn` | Logs a warning and keeps the config unchanged (ordering may break) |
 | `fail` | Throws `OrderTestShardError` — use this to enforce that sharding is never used with ordered sequences |
 
-**Important**: Set the `PLAYWRIGHT_SHARD` environment variable in addition to `--shard` when running in CI. Worker processes do not receive `--shard` in their argv, so shard detection requires the env var.
+Set the strategy in your config:
+
+```typescript
+orderedTests: {
+  shardStrategy: 'collapse',  // default — can be omitted
+  sequences: [/* ... */],
+}
+```
+
+### How collapse works
+
+Without sharding, the plugin generates a chained project per file:
+
+```
+Generated projects (normal run):
+
+  ordertest:checkout-flow:0   testMatch: [auth.spec.ts]       workers: 1
+    -> depends on
+  ordertest:checkout-flow:1   testMatch: [cart.spec.ts]        workers: 1
+    -> depends on
+  ordertest:checkout-flow:2   testMatch: [checkout.spec.ts]    workers: 1
+
+  ordertest:unordered          testMatch: [homepage.spec.ts, search.spec.ts]
+```
+
+When sharding is detected, collapse merges the chain into one atomic project:
+
+```
+Generated projects (with --shard, after collapse):
+
+  ordertest:checkout-flow     testMatch: [auth.spec.ts, cart.spec.ts, checkout.spec.ts]
+                              workers: 1, fullyParallel: false
+                              (no dependencies — single atomic unit)
+
+  ordertest:unordered         testMatch: [homepage.spec.ts, search.spec.ts]
+```
+
+The 3-step dependency chain becomes 1 project. Playwright's shard scheduler treats it as an indivisible unit — the entire sequence lands on one shard. Unordered tests distribute across shards normally.
+
+### Strategy + mode combinations
+
+What happens when sharding is active, for each `shardStrategy` and `mode` combination:
+
+| shardStrategy | serial | parallel | fullyParallel |
+|---------------|--------|----------|---------------|
+| `collapse` (default) | Chain merged into 1 project, `workers: 1`, `fullyParallel: false`. Entire sequence atomic on one shard. | Chain merged into 1 project, `workers: 1`, `fullyParallel: false`. Intra-file parallelism lost — forced serial for shard safety. | Chain merged into 1 project, `workers: 1`, `fullyParallel: false`. Per-test parallelism lost — forced serial for shard safety. |
+| `warn` | Projects unchanged. Dependency chain may be split across shards — **ordering can break**. | Projects unchanged. Dependency chain may be split across shards — **ordering can break**. | Projects unchanged. Individual tests may scatter across shards — **ordering can break at test level**. |
+| `fail` | Throws `OrderTestShardError` immediately. | Throws `OrderTestShardError` immediately. | Throws `OrderTestShardError` immediately. |
+
+Key takeaway: `collapse` always forces `workers: 1` and `fullyParallel: false` regardless of the original mode. This is the price of shard safety — intra-file parallelism is sacrificed to guarantee the sequence is indivisible. If your CI has enough shards, the time saved from distributing unordered tests across shards typically outweighs the loss of intra-file parallelism on the ordered sequence.
+
+### PLAYWRIGHT_SHARD environment variable
+
+**Important**: Set the `PLAYWRIGHT_SHARD` environment variable in addition to `--shard` when running in CI. Worker processes re-evaluate `playwright.config.ts` but do **not** receive `--shard` in their `process.argv`. Without the env var, the runner and workers produce different project names, causing errors.
 
 ```yaml
-# GitHub Actions example
-- run: npx playwright test --shard=${{ matrix.shard }}/4
-  env:
-    PLAYWRIGHT_SHARD: ${{ matrix.shard }}/4
+# GitHub Actions CI matrix
+jobs:
+  test:
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - run: npx playwright test --shard=${{ matrix.shard }}/4
+        env:
+          PLAYWRIGHT_SHARD: ${{ matrix.shard }}/4
 ```
+
+```bash
+# Local sharded run
+PLAYWRIGHT_SHARD=1/2 npx playwright test --shard=1/2
+PLAYWRIGHT_SHARD=2/2 npx playwright test --shard=2/2
+```
+
+See the full [CI sharding example](./examples/ci-sharding/) for a complete working setup with a run script and detailed explanation.
 
 ---
 

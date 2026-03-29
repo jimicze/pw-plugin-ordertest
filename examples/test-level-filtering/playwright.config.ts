@@ -8,19 +8,27 @@ import { defineOrderedConfig } from '@jimicze-pw/ordertest-core';
  *
  * This uses grep patterns under the hood — test names are matched
  * against the `test()` title.
+ *
+ * Demo site: https://www.saucedemo.com
+ * Login: standard_user / secret_sauce
  */
 export default defineOrderedConfig({
   testDir: './tests',
+  use: {
+    baseURL: 'https://www.saucedemo.com',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+  },
   orderedTests: {
     sequences: [
       {
         name: 'critical-path',
         mode: 'serial',
         files: [
-          // Run only specific tests from auth.spec.ts
+          // Run only specific tests from auth.spec.ts by exact name
           {
             file: 'auth.spec.ts',
-            tests: ['login with valid credentials', 'session cookie is set'],
+            tests: ['login with valid credentials', 'verify inventory page loads'],
           },
           // Run all tests in cart.spec.ts (simple string = all tests)
           'cart.spec.ts',

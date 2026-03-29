@@ -1,6 +1,6 @@
 # Migration Guide Example
 
-Shows how to migrate from a standard Playwright `defineConfig` to `defineOrderedConfig`.
+Shows how to migrate from a standard Playwright `defineConfig` to `defineOrderedConfig`, using [saucedemo.com](https://www.saucedemo.com) as the demo site.
 
 ## What This Shows
 
@@ -32,6 +32,9 @@ npm install @jimicze-pw/ordertest-core
 + export default defineOrderedConfig({
     testDir: './tests',
     retries: 1,
+    use: {
+      baseURL: 'https://www.saucedemo.com',
+    },
 +   orderedTests: {
 +     sequences: [
 +       {
@@ -44,7 +47,12 @@ npm install @jimicze-pw/ordertest-core
   });
 ```
 
-That's it! All standard Playwright features (reporters, retries, traces, etc.) continue to work exactly as before.
+That's it! All standard Playwright features (reporters, retries, traces, `baseURL`, etc.) continue to work exactly as before.
+
+## Demo Site
+
+**URL**: https://www.saucedemo.com  
+**Login**: `standard_user` / `secret_sauce`
 
 ## Run
 

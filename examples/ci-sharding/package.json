@@ -1,0 +1,13 @@
+{
+  "name": "example-ci-sharding",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:sharded": "bash run-sharded.sh"
+  },
+  "dependencies": {
+    "@jimicze-pw/ordertest-core": "workspace:*",
+    "@playwright/test": "^1.40.0"
+  }
+}

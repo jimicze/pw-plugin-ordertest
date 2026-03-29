@@ -15,6 +15,9 @@ test('complete purchase', async ({ page }) => {
   await page.locator('[data-test="postalCode"]').fill('12345');
   await page.locator('[data-test="continue"]').click();
 
+  await expect(page).toHaveURL(/checkout-step-two/);
+  await expect(page.locator('.inventory_item_name')).toHaveText('Sauce Labs Backpack');
+
   await page.locator('[data-test="finish"]').click();
   await expect(page.locator('.complete-header')).toHaveText('Thank you for your order!');
 });

@@ -29,6 +29,7 @@ export interface GeneratedProject {
   readonly grep?: RegExp;
   readonly retries?: number;
   readonly timeout?: number;
+  readonly use?: Record<string, unknown>;
   readonly metadata?: OrderTestProjectMetadata;
 }
 
@@ -133,11 +134,12 @@ export function generateSerialProjects(
       ...(grep !== undefined && { grep }),
       ...(sequence.retries !== undefined && { retries: sequence.retries }),
       ...(sequence.timeout !== undefined && { timeout: sequence.timeout }),
+      ...(sequence.browser !== undefined && { use: { browserName: sequence.browser } }),
       metadata,
     };
 
     debugConsole(
-      `  → Step ${index}: project="${name}" file="${file}" deps=[${dependencies.join(', ')}]${grep !== undefined ? ` grep=${grep}` : ''}`,
+      `  → Step ${index}: project="${name}" file="${file}" deps=[${dependencies.join(', ')}]${grep !== undefined ? ` grep=${grep}` : ''}${sequence.browser !== undefined ? ` browser=${sequence.browser}` : ''}`,
     );
     logger?.debug(
       {
@@ -145,6 +147,7 @@ export function generateSerialProjects(
         file,
         dependencies,
         ...(grep !== undefined && { grep: grep.toString() }),
+        ...(sequence.browser !== undefined && { browser: sequence.browser }),
         stepIndex: index,
         totalSteps,
       },

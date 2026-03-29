@@ -439,6 +439,54 @@ test.describe('generateParallelProjects — metadata', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Browser field → use.browserName
+// ---------------------------------------------------------------------------
+
+test.describe('generateParallelProjects — browser field', () => {
+  test('use is undefined when sequence.browser is not set', () => {
+    const seq = makeSequence({ files: ['a.spec.ts'] });
+    const [project] = generateParallelProjects(seq);
+
+    expect(project?.use).toBeUndefined();
+  });
+
+  test('use.browserName is set when sequence.browser is specified', () => {
+    const seq = makeSequence({ files: ['a.spec.ts'], browser: 'firefox' });
+    const [project] = generateParallelProjects(seq);
+
+    expect(project?.use).toEqual({ browserName: 'firefox' });
+  });
+
+  test('browser propagates to all projects in the chain', () => {
+    const seq = makeSequence({
+      files: ['a.spec.ts', 'b.spec.ts', 'c.spec.ts'],
+      browser: 'webkit',
+    });
+    const projects = generateParallelProjects(seq);
+
+    for (const project of projects) {
+      expect(project.use).toEqual({ browserName: 'webkit' });
+    }
+  });
+
+  test('browser does not interfere with other project fields', () => {
+    const seq = makeSequence({
+      name: 'brow',
+      files: ['a.spec.ts', 'b.spec.ts'],
+      browser: 'chromium',
+      workers: 4,
+      retries: 2,
+    });
+    const [first, second] = generateParallelProjects(seq);
+
+    expect(first?.use).toEqual({ browserName: 'chromium' });
+    expect(first?.workers).toBe(4);
+    expect(first?.retries).toBe(2);
+    expect(second?.dependencies).toEqual([`${PROJECT_NAME_PREFIX}:brow:0`]);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Edge cases
 // ---------------------------------------------------------------------------
 

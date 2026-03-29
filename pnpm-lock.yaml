@@ -46,6 +46,15 @@ importers:
         specifier: ^1.40.0
         version: 1.58.2
 
+  examples/ci-sharding:
+    dependencies:
+      '@jimicze-pw/ordertest-core':
+        specifier: workspace:*
+        version: link:../..
+      '@playwright/test':
+        specifier: ^1.40.0
+        version: 1.58.2
+
   examples/external-manifest:
     dependencies:
       '@jimicze-pw/ordertest-core':

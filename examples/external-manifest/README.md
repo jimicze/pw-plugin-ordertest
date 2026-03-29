@@ -1,6 +1,6 @@
 # External Manifest Example
 
-Sequence definitions loaded from an external `ordertest.config.json` file.
+Sequence definitions loaded from an external `ordertest.config.json` file, running against [saucedemo.com](https://www.saucedemo.com).
 
 ## What This Shows
 
@@ -8,6 +8,7 @@ Sequence definitions loaded from an external `ordertest.config.json` file.
 - **`defineOrderedConfigAsync`**: Async entry point required for external file loading
 - **JSON Schema**: The manifest references the JSON schema for editor auto-completion
 - **Auto-discovery**: If you omit `manifest:` path, the plugin auto-discovers `ordertest.config.{ts,json,yaml,yml}`
+- **Real E2E tests**: Login, add to cart, and complete purchase on saucedemo.com
 
 ## Files
 
@@ -20,6 +21,11 @@ external-manifest/
     ├── cart.spec.ts
     └── checkout.spec.ts
 ```
+
+## Demo Site
+
+**URL**: https://www.saucedemo.com  
+**Login**: `standard_user` / `secret_sauce`
 
 ## Run
 

@@ -1,29 +1,37 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 // All tests run — no filter applied (simple string entry in the manifest)
 test.describe('cart', () => {
   test('add item to cart', async ({ page }) => {
-    await page.goto('/products');
-    await page.getByRole('button', { name: 'Add to cart' }).first().click();
-    await expect(page.getByRole('status')).toContainText('Item added to cart');
-    await expect(page.getByTestId('cart-count')).toHaveText('1');
+    await page.goto('/');
+    await page.locator('[data-test="username"]').fill('standard_user');
+    await page.locator('[data-test="password"]').fill('secret_sauce');
+    await page.locator('[data-test="login-button"]').click();
+
+    await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
   });
 
-  test('remove item from cart', async ({ page }) => {
-    await page.goto('/cart');
-    await expect(page.getByTestId('cart-item')).toHaveCount(1);
-    await page.getByRole('button', { name: 'Remove' }).first().click();
-    await expect(page.getByTestId('cart-item')).toHaveCount(0);
-    await expect(page.getByText('Your cart is empty')).toBeVisible();
+  test('cart page shows added items', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('[data-test="username"]').fill('standard_user');
+    await page.locator('[data-test="password"]').fill('secret_sauce');
+    await page.locator('[data-test="login-button"]').click();
+
+    await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+    await page.locator('.shopping_cart_link').click();
+    await expect(page.locator('.cart_item')).toHaveCount(1);
   });
 
-  test('cart persists across page refresh', async ({ page }) => {
-    await page.goto('/products');
-    await page.getByRole('button', { name: 'Add to cart' }).first().click();
-    await expect(page.getByTestId('cart-count')).toHaveText('1');
-    await page.reload();
-    await expect(page.getByTestId('cart-count')).toHaveText('1');
-    await page.goto('/cart');
-    await expect(page.getByTestId('cart-item')).toHaveCount(1);
+  test('can remove item from cart', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('[data-test="username"]').fill('standard_user');
+    await page.locator('[data-test="password"]').fill('secret_sauce');
+    await page.locator('[data-test="login-button"]').click();
+
+    await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+    await page.locator('.shopping_cart_link').click();
+    await page.locator('[data-test="remove-sauce-labs-backpack"]').click();
+    await expect(page.locator('.cart_item')).toHaveCount(0);
   });
 });

@@ -1,5 +1,5 @@
 // Also unordered — runs independently, possibly in parallel with homepage.spec.ts.
-// This file is not part of any defineOrderedConfig sequence.
+// Under sharding, these tests distribute across shards normally.
 import { expect, test } from '@playwright/test';
 
 test('products can be sorted by price low to high', async ({ page }) => {

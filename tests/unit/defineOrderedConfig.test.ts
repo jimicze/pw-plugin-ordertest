@@ -199,3 +199,95 @@ test.describe('defineOrderedConfig — file existence validation', () => {
     ).not.toThrow();
   });
 });
+
+// ---------------------------------------------------------------------------
+// defineOrderedConfig — use passthrough
+// ---------------------------------------------------------------------------
+
+test.describe('defineOrderedConfig — use passthrough', () => {
+  let tmpDir: string;
+
+  test.beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ordertest-use-'));
+    fs.writeFileSync(path.join(tmpDir, 'a.spec.ts'), '// stub\n');
+    fs.writeFileSync(path.join(tmpDir, 'b.spec.ts'), '// stub\n');
+  });
+
+  test.afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  test('top-level use config is preserved in the output', () => {
+    const result = defineOrderedConfig({
+      use: { baseURL: 'http://localhost:3000', trace: 'on' },
+      projects: [{ testDir: tmpDir }],
+      orderedTests: {
+        logLevel: 'silent',
+        sequences: [{ name: 'seq', mode: 'serial', files: ['a.spec.ts'] }],
+      },
+    });
+
+    expect(result.use).toEqual({ baseURL: 'http://localhost:3000', trace: 'on' });
+  });
+
+  test('sequence.browser produces use.browserName on generated projects', () => {
+    const result = defineOrderedConfig({
+      projects: [{ testDir: tmpDir }],
+      orderedTests: {
+        logLevel: 'silent',
+        sequences: [{ name: 'ff-seq', mode: 'serial', files: ['a.spec.ts'], browser: 'firefox' }],
+      },
+    });
+
+    const projects = result.projects as Record<string, unknown>[];
+    // First project should be the ordered one (ordertest:ff-seq:0)
+    const orderedProject = projects?.find(
+      (p) => typeof p.name === 'string' && p.name.startsWith('ordertest:ff-seq:'),
+    );
+    expect(orderedProject).toBeDefined();
+    expect(orderedProject?.use).toEqual({ browserName: 'firefox' });
+  });
+
+  test('generated projects without browser have no use field', () => {
+    const result = defineOrderedConfig({
+      projects: [{ testDir: tmpDir }],
+      orderedTests: {
+        logLevel: 'silent',
+        sequences: [{ name: 'no-browser', mode: 'serial', files: ['a.spec.ts'] }],
+      },
+    });
+
+    const projects = result.projects as Record<string, unknown>[];
+    const orderedProject = projects?.find(
+      (p) => typeof p.name === 'string' && p.name.startsWith('ordertest:no-browser:'),
+    );
+    expect(orderedProject).toBeDefined();
+    expect(orderedProject?.use).toBeUndefined();
+  });
+
+  test('browser propagates to all projects in a multi-file sequence', () => {
+    const result = defineOrderedConfig({
+      projects: [{ testDir: tmpDir }],
+      orderedTests: {
+        logLevel: 'silent',
+        sequences: [
+          {
+            name: 'multi-browser',
+            mode: 'serial',
+            files: ['a.spec.ts', 'b.spec.ts'],
+            browser: 'webkit',
+          },
+        ],
+      },
+    });
+
+    const projects = result.projects as Record<string, unknown>[];
+    const orderedProjects = projects?.filter(
+      (p) => typeof p.name === 'string' && p.name.startsWith('ordertest:multi-browser:'),
+    );
+    expect(orderedProjects).toHaveLength(2);
+    for (const project of orderedProjects ?? []) {
+      expect(project.use).toEqual({ browserName: 'webkit' });
+    }
+  });
+});

@@ -95,12 +95,14 @@ export function generateFullyParallelProjects(
       ...(sequence.workers !== undefined && { workers: sequence.workers }),
       ...(sequence.retries !== undefined && { retries: sequence.retries }),
       ...(sequence.timeout !== undefined && { timeout: sequence.timeout }),
+      ...(sequence.browser !== undefined && { use: { browserName: sequence.browser } }),
     };
 
     debugConsole(
       `  step ${index}/${totalSteps - 1}: project="${projectName}" file="${file}"` +
         ` fullyParallel=true deps=[${dependencies.join(', ')}]` +
-        `${grep !== undefined ? ` grep=${grep.toString()}` : ''}`,
+        `${grep !== undefined ? ` grep=${grep.toString()}` : ''}` +
+        `${sequence.browser !== undefined ? ` browser=${sequence.browser}` : ''}`,
     );
     logger?.debug(
       {
@@ -112,6 +114,7 @@ export function generateFullyParallelProjects(
         workers: sequence.workers,
         retries: sequence.retries,
         timeout: sequence.timeout,
+        browser: sequence.browser,
         stepIndex: index,
         totalSteps,
       },

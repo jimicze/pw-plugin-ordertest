@@ -1,19 +1,42 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
-test('complete purchase with credit card', async ({ page }) => {
-  await page.goto('/checkout');
-  await page.getByLabel('Card number').fill('4242 4242 4242 4242');
-  await page.getByLabel('Expiry').fill('12/26');
-  await page.getByLabel('CVC').fill('123');
-  await page.getByRole('button', { name: 'Place order' }).click();
-  await expect(page).toHaveURL('/order-confirmation');
+test('complete purchase with valid info', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('[data-test="username"]').fill('standard_user');
+  await page.locator('[data-test="password"]').fill('secret_sauce');
+  await page.locator('[data-test="login-button"]').click();
+
+  await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+  await page.locator('.shopping_cart_link').click();
+  await page.locator('[data-test="checkout"]').click();
+
+  await page.locator('[data-test="firstName"]').fill('John');
+  await page.locator('[data-test="lastName"]').fill('Doe');
+  await page.locator('[data-test="postalCode"]').fill('12345');
+  await page.locator('[data-test="continue"]').click();
+
+  await page.locator('[data-test="finish"]').click();
+  await expect(page.locator('.complete-header')).toHaveText('Thank you for your order!');
 });
 
 test('show order confirmation after purchase', async ({ page }) => {
-  await page.goto('/checkout');
-  await page.getByLabel('Card number').fill('4242 4242 4242 4242');
-  await page.getByLabel('Expiry').fill('12/26');
-  await page.getByLabel('CVC').fill('123');
-  await page.getByRole('button', { name: 'Place order' }).click();
-  await expect(page.getByRole('heading', { name: 'Order confirmed' })).toBeVisible();
+  await page.goto('/');
+  await page.locator('[data-test="username"]').fill('standard_user');
+  await page.locator('[data-test="password"]').fill('secret_sauce');
+  await page.locator('[data-test="login-button"]').click();
+
+  await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+  await page.locator('.shopping_cart_link').click();
+  await page.locator('[data-test="checkout"]').click();
+
+  await page.locator('[data-test="firstName"]').fill('Jane');
+  await page.locator('[data-test="lastName"]').fill('Smith');
+  await page.locator('[data-test="postalCode"]').fill('90210');
+  await page.locator('[data-test="continue"]').click();
+
+  await expect(page.locator('.summary_info')).toBeVisible();
+  await page.locator('[data-test="finish"]').click();
+  await expect(page.locator('[data-test="complete-header"]')).toHaveText(
+    'Thank you for your order!',
+  );
 });

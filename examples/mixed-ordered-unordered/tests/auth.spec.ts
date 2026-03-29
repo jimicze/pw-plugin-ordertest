@@ -3,12 +3,12 @@
 import { expect, test } from '@playwright/test';
 
 test('user logs in', async ({ page }) => {
-  await page.goto('https://example.com/login');
+  await page.goto('/');
 
-  await page.getByLabel('Email').fill('user@example.com');
-  await page.getByLabel('Password').fill('supersecret');
-  await page.getByRole('button', { name: 'Log in' }).click();
+  await page.locator('[data-test="username"]').fill('standard_user');
+  await page.locator('[data-test="password"]').fill('secret_sauce');
+  await page.locator('[data-test="login-button"]').click();
 
-  await expect(page).toHaveURL('https://example.com/dashboard');
-  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+  await expect(page).toHaveURL(/inventory/);
+  await expect(page.locator('.title')).toHaveText('Products');
 });

@@ -67,7 +67,12 @@ export interface SequenceDefinition {
    */
   readonly files: readonly FileEntry[];
 
-  /** Browser/project to use (optional, uses default if not specified). */
+  /**
+   * Browser to use for this sequence (e.g., 'chromium', 'firefox', 'webkit').
+   * When set, each generated project receives `use: { browserName: browser }`,
+   * which tells Playwright to launch the specified browser for all tests in
+   * the sequence. If omitted, projects inherit the top-level `use` config.
+   */
   readonly browser?: string;
 
   /** Override retries for this sequence (optional, inherits from base config). */

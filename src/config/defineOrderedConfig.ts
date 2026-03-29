@@ -106,6 +106,10 @@ function toPlaywrightProject(project: GeneratedProject, testDir?: string): Recor
     pwProject.timeout = project.timeout;
   }
 
+  if (project.use !== undefined) {
+    pwProject.use = { ...project.use };
+  }
+
   // Store metadata so reporters can read it.
   // We set the native `metadata` field (available in Playwright >=1.45) so that
   // reporters receive it in FullConfig.projects[n].metadata.

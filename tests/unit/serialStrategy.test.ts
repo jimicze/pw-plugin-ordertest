@@ -506,6 +506,45 @@ test.describe('generateSerialProjects — optional logger', () => {
 });
 
 // ---------------------------------------------------------------------------
+// generateSerialProjects — browser field → use.browserName
+// ---------------------------------------------------------------------------
+
+test.describe('generateSerialProjects — browser field', () => {
+  test('use is undefined when sequence.browser is not set', () => {
+    const seq = makeSequence({ files: ['a.spec.ts'] });
+    const projects = generateSerialProjects(seq);
+
+    expect(projects[0]?.use).toBeUndefined();
+  });
+
+  test('use.browserName is set when sequence.browser is specified', () => {
+    const seq = makeSequence({ files: ['a.spec.ts'], browser: 'firefox' });
+    const projects = generateSerialProjects(seq);
+
+    expect(projects[0]?.use).toEqual({ browserName: 'firefox' });
+  });
+
+  test('browser propagates to all projects in the chain', () => {
+    const seq = makeSequence({
+      files: ['a.spec.ts', 'b.spec.ts', 'c.spec.ts'],
+      browser: 'webkit',
+    });
+    const projects = generateSerialProjects(seq);
+
+    for (const project of projects) {
+      expect(project.use).toEqual({ browserName: 'webkit' });
+    }
+  });
+
+  test('browser value is preserved exactly as provided', () => {
+    const seq = makeSequence({ files: ['a.spec.ts'], browser: 'chromium' });
+    const projects = generateSerialProjects(seq);
+
+    expect(projects[0]?.use?.browserName).toBe('chromium');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // generateSerialProjects — mixed FileEntry types
 // ---------------------------------------------------------------------------
 
