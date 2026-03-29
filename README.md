@@ -46,11 +46,13 @@ That's it. Playwright will now run `auth.spec.ts` → `cart.spec.ts` → `checko
 
 ## Execution Modes
 
-| Mode | Behavior | Use case |
-|------|----------|----------|
-| `serial` | `workers: 1`, strict file ordering | End-to-end flows where tests share state |
-| `parallel` | Default workers, file-level ordering (within-file tests are sequential) | Independent files that must run in a set order |
-| `fullyParallel` | Full parallelism within each file, file-level ordering enforced | Maximum throughput with guaranteed file ordering |
+All three modes generate **one project per file, linked by a linear dependency chain**. The difference is how workers and parallelism are configured within each project.
+
+| Mode | `workers` | `fullyParallel` | Behavior | Use case |
+|------|-----------|-----------------|----------|----------|
+| `serial` | `1` (forced, ignores `sequence.workers`) | `false` (forced) | One test at a time, strict order within and across files | End-to-end flows where tests share state |
+| `parallel` | `sequence.workers` or Playwright default | `false` (forced) | Files run in declared order; tests within each file use Playwright's default worker distribution | Independent files that must run in a set order |
+| `fullyParallel` | `sequence.workers` or Playwright default | `true` (forced) | Files run in declared order; each test within a file gets its own worker | Maximum throughput with guaranteed file ordering |
 
 ---
 
@@ -105,7 +107,7 @@ export default defineOrderedConfigAsync({
 | `name` | `string` | Yes | Unique sequence identifier |
 | `mode` | `'serial' \| 'parallel' \| 'fullyParallel'` | Yes | Execution mode |
 | `files` | `FileSpecification[]` | Yes | Ordered list of files |
-| `workers` | `number` | No | Worker count override (ignored in serial mode) |
+| `workers` | `number` | No | Worker count passed to each generated project. In `serial` mode, always overridden to `1`. In `parallel` and `fullyParallel` modes, omitted if not set (Playwright uses its default). |
 | `retries` | `number` | No | Retry count for all files in the sequence |
 | `timeout` | `number` | No | Test timeout in ms for all files |
 | `tags` | `string[]` | No | Tag filter applied to all files |
@@ -177,7 +179,19 @@ Generated projects (with --shard, after collapse):
 
 The 3-step dependency chain becomes 1 project. Playwright's shard scheduler treats it as an indivisible unit — the entire sequence lands on one shard. Unordered tests distribute across shards normally.
 
-### Strategy + mode combinations
+### Without sharding (normal mode)
+
+When running without `--shard`, each mode generates a linear dependency chain of one project per file:
+
+| Mode | `workers` per project | `fullyParallel` | Structure |
+|------|----------------------|-----------------|-----------|
+| `serial` | `1` (forced, ignores `sequence.workers`) | `false` | 1 project per file, linear dependency chain |
+| `parallel` | `sequence.workers` or Playwright default | `false` | 1 project per file, linear dependency chain |
+| `fullyParallel` | `sequence.workers` or Playwright default | `true` | 1 project per file, linear dependency chain |
+
+All three modes produce the same project structure (one project per file, chained via `dependencies`). The only difference is the `workers` and `fullyParallel` settings on each generated project.
+
+### With sharding — strategy + mode combinations
 
 What happens when sharding is active, for each `shardStrategy` and `mode` combination:
 
