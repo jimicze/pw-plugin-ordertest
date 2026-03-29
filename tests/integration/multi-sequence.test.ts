@@ -2,6 +2,7 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { expect, test } from '@playwright/test';
 
@@ -9,7 +10,7 @@ import { expect, test } from '@playwright/test';
 // Helpers
 // ---------------------------------------------------------------------------
 
-const PROJECT_ROOT = path.resolve(import.meta.dirname, '../..');
+const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 interface TestRecord {
   file: string;

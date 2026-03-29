@@ -10,10 +10,14 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { expect, test } from '@playwright/test';
 
-const DIST_INDEX = path.resolve(import.meta.dirname, '../../dist/index.js');
+const DIST_INDEX = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../../dist/index.js',
+);
 
 // Skip all smoke tests if dist/ hasn't been built yet
 test.skip(!fs.existsSync(DIST_INDEX), 'dist/ not built — run `pnpm build` first');

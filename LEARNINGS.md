@@ -149,6 +149,42 @@ _No entries yet._
 **Fix/Workaround**: Use dot notation: `process.env.ORDERTEST_LOG_LEVEL`. This works fine with TypeScript's `noUncheckedIndexedAccess` — the type is still `string | undefined`.
 **Prevention**: Always use dot notation for env var access: `process.env.VAR_NAME` not `process.env['VAR_NAME']`.
 
+### import.meta.dirname is not available on Node.js 18
+
+**Date**: 2026-03-29
+**Severity**: high
+**Context**: v0.2.1 CI matrix — integration tests failed on all Node 18 jobs with `TypeError: The "paths[0]" argument must be of type string. Received undefined`.
+**Problem**: `import.meta.dirname` was introduced in Node.js 20.11.0. On Node 18, it is `undefined`. We fixed this in the smoke test (`tests/smoke/package-contents.test.ts`) for v0.2.1 but missed all 6 integration test files and 1 smoke test file that also used it.
+**Fix/Workaround**: Replace `import.meta.dirname` with `path.dirname(fileURLToPath(import.meta.url))` from `node:url`. This is compatible with all ESM-capable Node.js versions.
+**Prevention**: Never use `import.meta.dirname` — always use the `fileURLToPath` pattern. Grep the codebase for `import.meta.dirname` before every release.
+
+### Windows CI fails Biome format check due to CRLF line endings
+
+**Date**: 2026-03-29
+**Severity**: high
+**Context**: v0.2.1 CI matrix — all Windows jobs failed on "Lint + Format check" because Biome expected LF but git checkout produced CRLF.
+**Problem**: Biome's `lineEnding: 'lf'` in `biome.json` requires Unix line endings, but `git checkout` on Windows converts to CRLF by default (via `core.autocrlf`).
+**Fix/Workaround**: Add `.gitattributes` with `* text=auto eol=lf` to force LF on all platforms.
+**Prevention**: Always create `.gitattributes` with `eol=lf` in any project that uses a formatter with a fixed line ending setting.
+
+### pnpm workspace requires -w flag for root-level dependency changes
+
+**Date**: 2026-03-29
+**Severity**: medium
+**Context**: CI "Override Playwright version" step ran `pnpm add -D @playwright/test@X` in a pnpm workspace and failed with `ERR_PNPM_ADDING_TO_ROOT`.
+**Problem**: In a pnpm workspace (with `pnpm-workspace.yaml`), adding a dependency at the root level requires the `-w` / `--workspace-root` flag.
+**Fix/Workaround**: Use `pnpm add -wD <package>` instead of `pnpm add -D <package>`.
+**Prevention**: Always use `-wD` when adding root-level dependencies in workspace repos, especially in CI scripts.
+
+### Old Playwright versions have stale browser CDN assets
+
+**Date**: 2026-03-29
+**Severity**: medium
+**Context**: CI matrix jobs for PW 1.40.0 and PW 1.44.0 failed with exit code 100 (Ubuntu) or HTTP 400 from `playwright.azureedge.net` (macOS).
+**Problem**: Playwright does not guarantee that old browser builds remain on their CDN indefinitely. Very old PW versions (1.40, 1.44) have had their Chromium builds removed.
+**Fix/Workaround**: Updated CI matrix from `['1.40.0', '1.44.0', 'latest']` to `['1.49.0', 'latest']`. The peer dep still declares `>=1.40.0` — the matrix tests practically available versions.
+**Prevention**: Periodically review CI matrix PW versions. Keep the "oldest tested" version to one whose browser artifacts are still downloadable (roughly within the last 12 months).
+
 ---
 
 ## Testing Issues

@@ -1,0 +1,3 @@
+# Force LF line endings for all text files.
+# Biome enforces lineEnding: 'lf' — Windows CRLF checkout breaks format checks.
+* text=auto eol=lf
